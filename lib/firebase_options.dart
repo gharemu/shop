@@ -42,7 +42,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCPMM38nkdiSSGvEHnQDHmn7xozsVFmhAA',
-    appId: '1:743244419249:web:bcd9a8a42d4fd78703d290',
+    appId: '1:743244419249:web:83876c7b08b30f7103d290',
     messagingSenderId: '743244419249',
     projectId: 'login-fe73f',
     authDomain: 'login-fe73f.firebaseapp.com',
@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAjNsmdvVw6y_249rbU4kaQHdh_YgMlmPc',
-    appId: '1:743244419249:android:ee16c3e414757c5f03d290',
+    appId: '1:743244419249:android:f0624106a6b3b06903d290',
     messagingSenderId: '743244419249',
     projectId: 'login-fe73f',
     databaseURL: 'https://login-fe73f-default-rtdb.firebaseio.com',
@@ -61,33 +61,34 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBUF-GoRzCQvjy4baorECmk7WMyWE0aW7g',
-    appId: '1:743244419249:ios:901ddf4937b7a57403d290',
+    appId: '1:743244419249:ios:a98e0604491d309103d290',
     messagingSenderId: '743244419249',
     projectId: 'login-fe73f',
     databaseURL: 'https://login-fe73f-default-rtdb.firebaseio.com',
     storageBucket: 'login-fe73f.firebasestorage.app',
-    iosClientId: '743244419249-gtbbk5vjkeapf47qg2b59k3rktpvikhl.apps.googleusercontent.com',
-    iosBundleId: 'com.example.deals',
+    iosClientId: '743244419249-uve1j8jj4ka8old7esaorjoonk9v59l3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.policeApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBUF-GoRzCQvjy4baorECmk7WMyWE0aW7g',
-    appId: '1:743244419249:ios:901ddf4937b7a57403d290',
+    appId: '1:743244419249:ios:a98e0604491d309103d290',
     messagingSenderId: '743244419249',
     projectId: 'login-fe73f',
     databaseURL: 'https://login-fe73f-default-rtdb.firebaseio.com',
     storageBucket: 'login-fe73f.firebasestorage.app',
-    iosClientId: '743244419249-gtbbk5vjkeapf47qg2b59k3rktpvikhl.apps.googleusercontent.com',
-    iosBundleId: 'com.example.deals',
+    iosClientId: '743244419249-uve1j8jj4ka8old7esaorjoonk9v59l3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.policeApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCPMM38nkdiSSGvEHnQDHmn7xozsVFmhAA',
-    appId: '1:743244419249:web:83876c7b08b30f7103d290',
+    appId: '1:743244419249:web:33298618bebbe9e403d290',
     messagingSenderId: '743244419249',
     projectId: 'login-fe73f',
     authDomain: 'login-fe73f.firebaseapp.com',
     databaseURL: 'https://login-fe73f-default-rtdb.firebaseio.com',
     storageBucket: 'login-fe73f.firebasestorage.app',
   );
+
 }
