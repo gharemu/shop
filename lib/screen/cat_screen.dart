@@ -67,7 +67,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   Widget _buildProductGrid(List<Product> products) {
     return Column(
       children: [
-        _buildCategoryBanner(),
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(8),
@@ -84,49 +83,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCategoryBanner() {
-    return Container(
-      height: 120,
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.pink[100]!, Colors.pink[300]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(0),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _tabController.index == 0
-                  ? "MEN'S FASHION"
-                  : _tabController.index == 1
-                  ? "WOMEN'S FASHION"
-                  : "KIDS' FASHION",
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "FLAT 50-80% OFF",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
