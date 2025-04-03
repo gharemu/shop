@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Myntra Clone',
+      title: 'Deals',
       theme: ThemeData(primarySwatch: Colors.pink),
       home: HomeScreen(),
     );

@@ -1,7 +1,7 @@
+import 'package:Deals/screen/bags_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/screen/wishlist_screen.dart';
-import 'package:Deals/screen/login_page.dart';
-import 'package:Deals/screen/cart_screen.dart';
+import 'package:Deals/login/login_page.dart';
 import 'package:Deals/screen/notifications_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -74,7 +74,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CartScreen()),
+              MaterialPageRoute(builder: (context) => const BagsScreen()),
             );
           },
         ),
@@ -83,7 +83,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) =>  AuthScreen()),
+              MaterialPageRoute(builder: (context) => AuthScreen()),
             );
           },
         ),

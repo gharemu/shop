@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Deals/screen/cat_screen.dart';
-import 'package:Deals/bottom_nav.dart';
+import 'package:Deals/screen/bottom_nav.dart';
 import 'package:Deals/screen/custome_app_bar.dart';
 import 'package:Deals/screen/under_999_screen.dart';
 import 'package:Deals/screen/category_page.dart';

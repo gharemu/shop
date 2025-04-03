@@ -18,6 +18,7 @@ class Product with ChangeNotifier {
   final List<String> colors;
   final double rating;
   final int reviews;
+  final bool isNew; // Add this line
 
   Product({
     required this.id,
@@ -36,6 +37,7 @@ class Product with ChangeNotifier {
     required this.colors,
     required this.rating,
     required this.reviews,
+    this.isNew = false, // Default value for isNew
   });
   void toggleFavorite() {
     isFavorite = !isFavorite;

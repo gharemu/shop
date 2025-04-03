@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'auth_service.dart';
 import 'auth_screen.dart';
 import 'edit_profile_screen.dart';
-import 'cart_screen.dart';
 import 'view_profile_screen.dart';
 
 class AccountScreen extends StatefulWidget {

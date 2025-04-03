@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Deals/subcategoryDetailsPage.dart';
+import 'package:Deals/screen/subcategoryDetailsPage.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
@@ -13,17 +13,35 @@ class _CategoryPageState extends State<CategoryPage> {
     {
       'name': 'Men',
       'image': 'assets/men.png',
-      'subcategories': ['Casual wear', 'Formal wear', 'Traditional wear', 'Winter wear', 'Summer wear']
+      'subcategories': [
+        'Casual wear',
+        'Formal wear',
+        'Traditional wear',
+        'Winter wear',
+        'Summer wear',
+      ],
     },
     {
       'name': 'Women',
       'image': 'assets/women.png',
-      'subcategories': ['Casual wear', 'Formal wear', 'Indian wear', 'Western wear', 'Summer wear']
+      'subcategories': [
+        'Casual wear',
+        'Formal wear',
+        'Indian wear',
+        'Western wear',
+        'Summer wear',
+      ],
     },
     {
       'name': 'Kids',
       'image': 'assets/kids.png',
-      'subcategories': ['Boys', 'Girls', 'Infants', 'Trendy wear', 'Comfy clothes']
+      'subcategories': [
+        'Boys',
+        'Girls',
+        'Infants',
+        'Trendy wear',
+        'Comfy clothes',
+      ],
     },
   ];
 
@@ -92,11 +110,16 @@ class _CategoryPageState extends State<CategoryPage> {
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 15),
-                    color: selectedIndex == index ? Colors.white : Colors.grey[200],
+                    color:
+                        selectedIndex == index
+                            ? Colors.white
+                            : Colors.grey[200],
                     child: Column(
                       children: [
                         CircleAvatar(
-                          backgroundImage: AssetImage(categories[index]['image']),
+                          backgroundImage: AssetImage(
+                            categories[index]['image'],
+                          ),
                           radius: 25,
                         ),
                         SizedBox(height: 5),
@@ -104,7 +127,10 @@ class _CategoryPageState extends State<CategoryPage> {
                           categories[index]['name'],
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: selectedIndex == index ? FontWeight.bold : FontWeight.normal,
+                            fontWeight:
+                                selectedIndex == index
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -120,30 +146,35 @@ class _CategoryPageState extends State<CategoryPage> {
               padding: EdgeInsets.all(12),
               itemCount: categories[selectedIndex]['subcategories'].length,
               itemBuilder: (context, index) {
-                String subcategory = categories[selectedIndex]['subcategories'][index];
+                String subcategory =
+                    categories[selectedIndex]['subcategories'][index];
 
                 return ExpansionTile(
                   title: Text(
                     subcategory,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  children: subcategoryDetails.containsKey(subcategory)
-                      ? subcategoryDetails[subcategory]!
-                          .map((subItem) => ListTile(
-                                title: Text(subItem),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SubcategoryDetailPage(
-                                        subcategory: subItem,
+                  children:
+                      subcategoryDetails.containsKey(subcategory)
+                          ? subcategoryDetails[subcategory]!
+                              .map(
+                                (subItem) => ListTile(
+                                  title: Text(subItem),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => SubcategoryDetailPage(
+                                              subcategory: subItem,
+                                            ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ))
-                          .toList()
-                      : [Text("No further subcategories")],
+                                    );
+                                  },
+                                ),
+                              )
+                              .toList()
+                          : [Text("No further subcategories")],
                 );
               },
             ),
