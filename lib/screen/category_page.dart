@@ -150,18 +150,6 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
-          BottomNavigationBarItem(icon: Icon(Icons.branding_watermark), label: 'BRANDS'),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: 'CATEGORIES'),
-          BottomNavigationBarItem(icon: Icon(Icons.diamond), label: 'LUXE'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'ACCOUNT'),
-        ],
-      ),
     );
   }
 }
