@@ -55,7 +55,7 @@ class _AccountScreenState extends State<AccountScreen> with SingleTickerProvider
       
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error logging out: $e"),
-        backgroundColor: Colors.red,
+        backgroundColor: const Color.fromARGB(255, 232, 53, 40),
         behavior: SnackBarBehavior.floating,
       ));
       
