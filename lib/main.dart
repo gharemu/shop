@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Myntra Clone',
       theme: ThemeData(primarySwatch: Colors.pink),
-      home: SigninPage(),
+      home: HomeScreen(),
     );
   }
 }

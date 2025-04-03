@@ -31,8 +31,8 @@ class BottomNavigation extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.diamond_outlined),
-          activeIcon: Icon(Icons.diamond),
-          label: "Luxury",
+          activeIcon: Icon(Icons.category_outlined),
+          label: "Categories",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag_outlined),
