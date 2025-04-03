@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:police_app/screen/wishlist_screen.dart';
-import 'package:police_app/screen/login_page.dart';
-import 'package:police_app/screen/cart_screen.dart';
-import 'package:police_app/screen/notifications_screen.dart';
+import 'package:Deals/screen/wishlist_screen.dart';
+import 'package:Deals/screen/login_page.dart';
+import 'package:Deals/screen/cart_screen.dart';
+import 'package:Deals/screen/notifications_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});

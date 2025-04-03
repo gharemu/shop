@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:police_app/models/product.dart';
+import 'package:Deals/models/product.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:police_app/models/product.dart';
-import 'package:police_app/screen/product_detail_screen.dart';
-import 'package:police_app/services/product_service.dart';
+import 'package:Deals/models/product.dart';
+import 'package:Deals/screen/product_detail_screen.dart';
+import 'package:Deals/services/product_service.dart';
 
 class Under999Screen extends StatefulWidget {
   const Under999Screen({super.key});

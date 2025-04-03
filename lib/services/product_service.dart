@@ -1,4 +1,4 @@
-import 'package:police_app/models/product.dart';
+import 'package:Deals/models/product.dart';
 
 class ProductService {
   // Men products

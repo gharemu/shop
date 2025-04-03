@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:police_app/screen/cat_screen.dart';
-import 'package:police_app/bottom_nav.dart';
-import 'package:police_app/screen/custome_app_bar.dart';
-import 'package:police_app/screen/under_999_screen.dart';
-import 'package:police_app/screen/category_page.dart';
-import 'package:police_app/screen/bags_screen.dart';
+import 'package:Deals/screen/cat_screen.dart';
+import 'package:Deals/bottom_nav.dart';
+import 'package:Deals/screen/custome_app_bar.dart';
+import 'package:Deals/screen/under_999_screen.dart';
+import 'package:Deals/screen/category_page.dart';
+import 'package:Deals/screen/bags_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
