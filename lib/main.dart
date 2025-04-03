@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:police_app/home_screen.dart';
-import 'package:police_app/signin_page.dart';
 
 void main() {
   runApp(const MyApp());

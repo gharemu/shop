@@ -1,5 +1,7 @@
 // models/product.dart
-class Product {
+import 'package:flutter/material.dart';
+
+class Product with ChangeNotifier {
   final String id;
   final String name;
   final String brand;
@@ -35,4 +37,8 @@ class Product {
     required this.rating,
     required this.reviews,
   });
+  void toggleFavorite() {
+    isFavorite = !isFavorite;
+    notifyListeners();
+  }
 }
