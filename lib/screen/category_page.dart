@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:police_app/subcategoryDetailsPage.dart';
+import 'package:Deals/subcategoryDetailsPage.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
