@@ -3,7 +3,7 @@ import 'package:police_app/screen/cat_screen.dart';
 import 'package:police_app/bottom_nav.dart';
 import 'package:police_app/screen/custome_app_bar.dart';
 import 'package:police_app/screen/under_999_screen.dart';
-import 'package:police_app/screen/luxury_screen.dart';
+import 'package:police_app/screen/category_page.dart';
 import 'package:police_app/screen/bags_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const CategoriesScreen(), // Main category screen
     const Under999Screen(), // Under 999 screen
-    const LuxuryScreen(), // Luxury section
+    CategoryPage(), // Luxury section
     const BagsScreen(), // Bags section
   ];
 

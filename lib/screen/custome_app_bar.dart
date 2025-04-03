@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:police_app/screen/wishlist_screen.dart';
-import 'package:police_app/screen/profile_screen.dart';
+import 'package:police_app/screen/login_page.dart';
 import 'package:police_app/screen/cart_screen.dart';
 import 'package:police_app/screen/notifications_screen.dart';
 
@@ -83,7 +83,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              MaterialPageRoute(builder: (context) =>  LoginPage()),
             );
           },
         ),
