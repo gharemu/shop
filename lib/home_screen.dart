@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Deals/screen/cat_screen.dart';
-import 'package:Deals/bottom_nav.dart';
+import 'package:Deals/screen/bags_screen.dart';
+import 'package:Deals/screen/bottom_nav.dart';
 import 'package:Deals/screen/custome_app_bar.dart';
 import 'package:Deals/screen/under_999_screen.dart';
 import 'package:Deals/screen/category_page.dart';
-import 'package:Deals/screen/bags_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,9 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const CategoriesScreen(), // Main category screen
-    const Under999Screen(), // Under 999 screen
-    CategoryPage(), // Luxury section
-    const BagsScreen(), // Bags section
+    const Under999Screen(),     // Under 999 screen
+    CategoryPage(),             // Luxury section
+    const BagsScreen(),         // Bags section
   ];
 
   void _onItemTapped(int index) {
@@ -29,11 +29,25 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Build method with AnimatedSwitcher for smooth transitions.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: _screens[_selectedIndex],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        child: Container(
+          // Key is necessary so AnimatedSwitcher knows when a new widget is shown.
+          key: ValueKey<int>(_selectedIndex),
+          child: _screens[_selectedIndex],
+        ),
+      ),
       bottomNavigationBar: BottomNavigation(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

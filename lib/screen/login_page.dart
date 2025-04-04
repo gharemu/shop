@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 //simport 'auth_service.dart';
 //import 'account_screen.dart';
-import 'package:Deals/auth_service.dart';
-import 'package:Deals/account_screen.dart';
+import 'package:Deals/login/auth_service.dart';
+import 'package:Deals/login/account_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);

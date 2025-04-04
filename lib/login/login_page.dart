@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'login/auth_service.dart';
-import 'login/account_screen.dart';
+//simport 'auth_service.dart';
+//import 'account_screen.dart';
+import 'package:Deals/login/auth_service.dart';
+import 'package:Deals/login/account_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -11,17 +13,18 @@ class AuthScreen extends StatefulWidget {
   _AuthScreenState createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
   bool isLogin = true;
   bool isLoading = false;
   bool obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
-  
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -33,7 +36,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 500),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn)
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
     _animationController.forward();
   }
@@ -123,21 +126,23 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       setState(() {
         isLoading = true;
       });
-      
+
       try {
         final AuthService authService = AuthService();
-        
+
         if (isLogin) {
           User? user = await authService.signIn(
-            emailController.text.trim(), 
-            passwordController.text
+            emailController.text.trim(),
+            passwordController.text,
           );
-          
+
           if (user != null) {
             _showSuccessSnackBar('Login successful!');
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AccountScreen(user: user)),
+              MaterialPageRoute(
+                builder: (context) => AccountScreen(user: user),
+              ),
             );
           } else {
             _showErrorSnackBar('Login failed. Please check your credentials.');
@@ -175,7 +180,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -217,15 +222,15 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           ),
                         ),
                         Text(
-                          isLogin 
-                              ? "Sign in to continue" 
+                          isLogin
+                              ? "Sign in to continue"
                               : "Fill the form to get started",
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
                         ),
                         const SizedBox(height: 30),
-                        
+
                         // Form Fields
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -270,7 +275,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                             ),
                           ),
                         ),
-                        
+
                         TextFormField(
                           controller: emailController,
                           decoration: InputDecoration(
@@ -285,7 +290,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 16),
-                        
+
                         TextFormField(
                           controller: passwordController,
                           decoration: InputDecoration(
@@ -293,8 +298,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                             prefixIcon: const Icon(Icons.lock),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                obscurePassword 
-                                    ? Icons.visibility_off 
+                                obscurePassword
+                                    ? Icons.visibility_off
                                     : Icons.visibility,
                               ),
                               onPressed: () {
@@ -309,11 +314,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           ),
                           obscureText: obscurePassword,
                           validator: _validatePassword,
-                          textInputAction: isLogin 
-                              ? TextInputAction.done 
-                              : TextInputAction.next,
+                          textInputAction:
+                              isLogin
+                                  ? TextInputAction.done
+                                  : TextInputAction.next,
                         ),
-                        
+
                         if (isLogin) ...[
                           Align(
                             alignment: Alignment.centerRight,
@@ -325,9 +331,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                             ),
                           ),
                         ],
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Submit Button
                         SizedBox(
                           width: double.infinity,
@@ -339,20 +345,21 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: isLoading
-                                ? const CircularProgressIndicator()
-                                : Text(
-                                    isLogin ? "LOGIN" : "SIGN UP",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                            child:
+                                isLoading
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                      isLogin ? "LOGIN" : "SIGN UP",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Toggle between Login and Signup
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -375,7 +382,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                             ),
                           ],
                         ),
-                        
+
                         // Social Login
                         if (isLogin) ...[
                           const SizedBox(height: 30),
@@ -424,7 +431,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _socialLoginButton({
     required IconData icon,
     required Color color,
@@ -440,11 +447,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           shape: BoxShape.circle,
           border: Border.all(color: Colors.grey.shade300),
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 30,
-        ),
+        child: Icon(icon, color: color, size: 30),
       ),
     );
   }
