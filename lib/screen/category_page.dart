@@ -91,36 +91,6 @@ class _CategoryPageState extends State<CategoryPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text(
-          'Categories',
-          style: TextStyle(
-            fontFamily: 'Poster',
-            fontSize: 24,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.favorite_border),
-            onPressed: () {},
-          ),
-          IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.shopping_bag_outlined),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: Row(
         children: [
           // Left Category List with Animation on selection using AnimatedContainer.
