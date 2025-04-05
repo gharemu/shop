@@ -30,7 +30,7 @@ class BottomNavigation extends StatelessWidget {
           label: "Under ₹999",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.diamond_outlined),
+          icon: Icon(Icons.category_outlined),
           activeIcon: Icon(Icons.category_outlined),
           label: "Categories",
         ),

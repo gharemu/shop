@@ -17,13 +17,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   late TabController _tabController;
   final ProductService _productService = ProductService();
   bool _isLoading = true;
-  String _selectedFilter = "All";
-  List<String> _filters = ["All", "New", "Popular", "Sale"];
-  
-  TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-  List<Product> _filteredProducts = [];
-  
+
   final ScrollController _scrollController = ScrollController();
   bool _showBackToTopButton = false;
 
@@ -32,7 +26,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
-    
+
     // Simulate loading data
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
@@ -41,7 +35,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         });
       }
     });
-    
+
     _scrollController.addListener(() {
       setState(() {
         _showBackToTopButton = _scrollController.offset >= 200;
@@ -53,11 +47,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     if (_tabController.indexIsChanging) {
       setState(() {
         _isLoading = true;
-        _selectedFilter = "All";
-        _searchController.clear();
-        _isSearching = false;
       });
-      
+
       // Simulate loading data when switching tabs
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
@@ -68,94 +59,19 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       });
     }
   }
-  
+
   void _scrollToTop() {
-    _scrollController.animateTo(0,
-      duration: const Duration(milliseconds: 500), 
-      curve: Curves.easeInOut
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
     );
-  }
-  
-  void _filterProducts(String query) {
-    List<Product> currentProducts;
-    
-    switch (_tabController.index) {
-      case 0:
-        currentProducts = _productService.getMenProducts();
-        break;
-      case 1:
-        currentProducts = _productService.getWomenProducts();
-        break;
-      default:
-        currentProducts = _productService.getKidsProducts();
-    }
-    
-    setState(() {
-      if (query.isEmpty) {
-        _isSearching = false;
-        _filteredProducts = [];
-      } else {
-        _isSearching = true;
-        _filteredProducts = currentProducts
-            .where((product) => 
-                product.name.toLowerCase().contains(query.toLowerCase()) ||
-                product.brand.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
-    });
-  }
-  
-  List<Product> _getFilteredProducts(List<Product> products) {
-    if (_selectedFilter == "All") {
-      return products;
-    } else if (_selectedFilter == "New") {
-      return products.where((p) => p.isNew).toList();
-    } else if (_selectedFilter == "Popular") {
-      return products.where((p) => p.rating >= 4.0).toList();
-    } else { // Sale
-      return products.where((p) => p.discount > 0).toList();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: _isSearching 
-          ? _buildSearchField()
-          : const Text(
-              "Shop by Categories",
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            color: Colors.black87,
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _filteredProducts = [];
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            color: Colors.black87,
-            onPressed: () {
-              _showFilterBottomSheet();
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
           Container(
@@ -169,133 +85,53 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 ),
               ],
             ),
-            child: TabBar(
-              controller: _tabController,
-              labelColor: const Color(0xFFFF3E6C),
-              unselectedLabelColor: Colors.black54,
-              indicatorColor: const Color(0xFFFF3E6C),
-              indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              tabs: const [
-                Tab(text: 'MEN'),
-                Tab(text: 'WOMEN'),
-                Tab(text: 'KIDS'),
-              ],
+            child: SafeArea(
+              bottom: false,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: const Color(0xFFFF3E6C),
+                unselectedLabelColor: Colors.black54,
+                indicatorColor: const Color(0xFFFF3E6C),
+                indicatorWeight: 3,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                tabs: const [
+                  Tab(text: 'MEN'),
+                  Tab(text: 'WOMEN'),
+                  Tab(text: 'KIDS'),
+                ],
+              ),
             ),
           ),
-          _buildFilterChips(),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _isSearching 
-                    ? _buildSearchResults()
-                    : _buildProductGrid(_productService.getMenProducts()),
-                _isSearching 
-                    ? _buildSearchResults()
-                    : _buildProductGrid(_productService.getWomenProducts()),
-                _isSearching 
-                    ? _buildSearchResults()
-                    : _buildProductGrid(_productService.getKidsProducts()),
+                _buildProductGrid(_productService.getMenProducts()),
+                _buildProductGrid(_productService.getWomenProducts()),
+                _buildProductGrid(_productService.getKidsProducts()),
               ],
             ),
           ),
         ],
       ),
-      floatingActionButton: _showBackToTopButton
-          ? FloatingActionButton(
-              mini: true,
-              backgroundColor: const Color(0xFFFF3E6C),
-              child: const Icon(Icons.arrow_upward),
-              onPressed: _scrollToTop,
-            )
-          : null,
-    );
-  }
-  
-  Widget _buildSearchField() {
-    return TextField(
-      controller: _searchController,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: "Search products...",
-        border: InputBorder.none,
-        hintStyle: TextStyle(color: Colors.grey[400]),
-      ),
-      style: const TextStyle(color: Colors.black87),
-      onChanged: _filterProducts,
-    );
-  }
-  
-  Widget _buildSearchResults() {
-    if (_filteredProducts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              "No products found",
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return _buildProductGrid(_filteredProducts);
-  }
-  
-  Widget _buildFilterChips() {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _filters.length,
-        itemBuilder: (context, index) {
-          final filter = _filters[index];
-          final isSelected = _selectedFilter == filter;
-          
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: FilterChip(
-              label: Text(filter),
-              selected: isSelected,
-              onSelected: (_) {
-                setState(() {
-                  _selectedFilter = filter;
-                });
-              },
-              backgroundColor: Colors.grey[200],
-              selectedColor: const Color(0xFFFFD1DC),
-              labelStyle: TextStyle(
-                color: isSelected ? const Color(0xFFFF3E6C) : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: isSelected ? const Color(0xFFFF3E6C) : Colors.transparent,
-                  width: 1,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      floatingActionButton:
+          _showBackToTopButton
+              ? FloatingActionButton(
+                mini: true,
+                backgroundColor: const Color(0xFFFF3E6C),
+                child: const Icon(Icons.arrow_upward),
+                onPressed: _scrollToTop,
+              )
+              : null,
     );
   }
 
   Widget _buildProductGrid(List<Product> products) {
-    final filteredProducts = _getFilteredProducts(products);
-    
     if (_isLoading) {
       return _buildLoadingGrid();
     }
-    
-    if (filteredProducts.isEmpty) {
+
+    if (products.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -317,10 +153,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         setState(() {
           _isLoading = true;
         });
-        
+
         // Simulate refresh
         await Future.delayed(const Duration(milliseconds: 800));
-        
+
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -333,16 +169,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
         padding: const EdgeInsets.all(10),
-        itemCount: filteredProducts.length,
+        itemCount: products.length,
         itemBuilder: (context, index) {
           // Add staggered effect with slightly different heights
-          double heightFactor = index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
-          return _buildProductCard(filteredProducts[index], heightFactor);
+          double heightFactor =
+              index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
+          return _buildProductCard(products[index], heightFactor);
         },
       ),
     );
   }
-  
+
   Widget _buildLoadingGrid() {
     return GridView.builder(
       padding: const EdgeInsets.all(10),
@@ -379,23 +216,11 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 80,
-                        height: 12,
-                        color: Colors.white,
-                      ),
+                      Container(width: 80, height: 12, color: Colors.white),
                       const SizedBox(height: 8),
-                      Container(
-                        width: 120,
-                        height: 10,
-                        color: Colors.white,
-                      ),
+                      Container(width: 120, height: 10, color: Colors.white),
                       const SizedBox(height: 8),
-                      Container(
-                        width: 60,
-                        height: 10,
-                        color: Colors.white,
-                      ),
+                      Container(width: 60, height: 10, color: Colors.white),
                     ],
                   ),
                 ),
@@ -416,22 +241,36 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    ProductDetailScreen(product: product),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                pageBuilder:
+                    (context, animation, secondaryAnimation) =>
+                        ProductDetailScreen(product: product),
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) {
                   const begin = Offset(0.0, 0.05);
                   const end = Offset.zero;
                   const curve = Curves.easeInOut;
-                  var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                  var tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
                   var offsetAnimation = animation.drive(tween);
-                  return SlideTransition(position: offsetAnimation, child: child);
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
                 },
               ),
             );
           },
           child: Card(
             elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -451,15 +290,15 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           if (loadingProgress == null) return child;
                           return Container(
                             height: 180 * heightFactor,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                            ),
+                            decoration: BoxDecoration(color: Colors.grey[200]),
                             child: Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
                                 valueColor: const AlwaysStoppedAnimation<Color>(
                                   Color(0xFFFF3E6C),
                                 ),
@@ -470,9 +309,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             height: 180 * heightFactor,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                            ),
+                            decoration: BoxDecoration(color: Colors.grey[200]),
                             child: const Center(
                               child: Icon(
                                 Icons.broken_image,
@@ -491,7 +328,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           setState(() {
                             product.isFavorite = !product.isFavorite;
                           });
-                          
+
                           // Animated feedback
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -512,9 +349,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   ),
                                 ],
                               ),
-                              backgroundColor: product.isFavorite
-                                  ? const Color(0xFFFF3E6C)
-                                  : Colors.grey[700],
+                              backgroundColor:
+                                  product.isFavorite
+                                      ? const Color(0xFFFF3E6C)
+                                      : Colors.grey[700],
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
@@ -550,9 +388,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   product.isFavorite
                                       ? Icons.favorite
                                       : Icons.favorite_border,
-                                  color: product.isFavorite
-                                      ? const Color(0xFFFF3E6C)
-                                      : Colors.grey[600],
+                                  color:
+                                      product.isFavorite
+                                          ? const Color(0xFFFF3E6C)
+                                          : Colors.grey[600],
                                   size: 20,
                                 ),
                               ),
@@ -740,174 +579,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       ),
     );
   }
-  
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filters",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Sort By",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 10,
-                    children: [
-                      _buildFilterOption("Popularity", true, setModalState),
-                      _buildFilterOption("Price: Low to High", false, setModalState),
-                      _buildFilterOption("Price: High to Low", false, setModalState),
-                      _buildFilterOption("Newest First", false, setModalState),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Categories",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 10,
-                    children: [
-                      _buildFilterOption("T-Shirts", false, setModalState),
-                      _buildFilterOption("Shirts", false, setModalState),
-                      _buildFilterOption("Jeans", false, setModalState),
-                      _buildFilterOption("Shoes", false, setModalState),
-                      _buildFilterOption("Accessories", false, setModalState),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Price Range",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  RangeSlider(
-                    values: const RangeValues(500, 3000),
-                    min: 0,
-                    max: 5000,
-                    divisions: 50,
-                    activeColor: const Color(0xFFFF3E6C),
-                    inactiveColor: Colors.grey[300],
-                    labels: const RangeLabels("₹500", "₹3000"),
-                    onChanged: (RangeValues values) {},
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey[400]!),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            "RESET",
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            backgroundColor: const Color(0xFFFF3E6C),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            "APPLY",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-  
-  Widget _buildFilterOption(String label, bool isSelected, StateSetter setModalState) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        setModalState(() {
-          // Update selection
-        });
-      },
-      backgroundColor: Colors.grey[200],
-      selectedColor: const Color(0xFFFFD1DC),
-      labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFFFF3E6C) : Colors.black87,
-      ),
-    );
-  }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
