@@ -2,11 +2,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "http://192.168.10.49:5000/api/auth";
+  static const String authUrl = "http://192.168.10.49:5000/api/auth";
+  static const String userUrl = "http://192.168.10.49:5000/api/user";
 
-  // Register user
-  static Future<Map<String, dynamic>> registerUser(String name, String email, String password) async {
-    final Uri url = Uri.parse("$baseUrl/register");
+  // Utility to safely decode JSON
+  static dynamic safeJsonDecode(String body) {
+    try {
+      return jsonDecode(body);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // REGISTER USER
+  static Future<Map<String, dynamic>> registerUser(
+      String name, String email, String password) async {
+    final Uri url = Uri.parse("$authUrl/register");
     try {
       final response = await http.post(
         url,
@@ -17,9 +28,10 @@ class ApiService {
       if (response.statusCode == 201) {
         return {"success": true, "message": "User registered successfully"};
       } else {
+        final decoded = safeJsonDecode(response.body);
         return {
           "success": false,
-          "message": jsonDecode(response.body)["error"] ?? "Registration failed"
+          "message": decoded?["error"] ?? "Registration failed"
         };
       }
     } catch (e) {
@@ -27,36 +39,40 @@ class ApiService {
     }
   }
 
-  // Login user
-static Future<Map<String, dynamic>> loginUser(String email, String password) async {
-  final Uri url = Uri.parse("$baseUrl/login");
-  try {
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "password": password}),
-    );
+  // LOGIN USER
+  static Future<Map<String, dynamic>> loginUser(
+      String email, String password) async {
+    final Uri url = Uri.parse("$authUrl/login");
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "password": password}),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        "success": true,
-        "message": "Login successful",
-        "token": data["token"],
-        "user": data["user"], // assuming your backend sends user details
-      };
-    } else {
-      return {"success": false, "message": jsonDecode(response.body)["error"] ?? "Login failed"};
+      if (response.statusCode == 200) {
+        final data = safeJsonDecode(response.body);
+        return {
+          "success": true,
+          "message": "Login successful",
+          "token": data["token"],
+          "user": data["user"],
+        };
+      } else {
+        final decoded = safeJsonDecode(response.body);
+        return {
+          "success": false,
+          "message": decoded?["error"] ?? "Login failed"
+        };
+      }
+    } catch (e) {
+      return {"success": false, "message": "Error: $e"};
     }
-  } catch (e) {
-    return {"success": false, "message": "Error: $e"};
   }
-}
 
-
-  // GET user profile
+  // GET PROFILE (based on Angular service)
   static Future<Map<String, dynamic>> getProfile(String token) async {
-    final Uri url = Uri.parse("$baseUrl/profile");
+    final Uri url = Uri.parse("$userUrl/profile");
     try {
       final response = await http.get(
         url,
@@ -67,22 +83,24 @@ static Future<Map<String, dynamic>> loginUser(String email, String password) asy
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = safeJsonDecode(response.body);
         return {"success": true, "data": data};
       } else {
-        return {"success": false, "message": "Failed to fetch profile"};
+        final decoded = safeJsonDecode(response.body);
+        return {
+          "success": false,
+          "message": decoded?["error"] ?? "Failed to fetch profile"
+        };
       }
     } catch (e) {
       return {"success": false, "message": "Error: $e"};
     }
   }
 
-  // PUT update profile
+  // UPDATE PROFILE (based on Angular service)
   static Future<Map<String, dynamic>> updateProfile(
-    Map<String, dynamic> updatedData,
-    String token,
-  ) async {
-    final Uri url = Uri.parse("$baseUrl/profile");
+      Map<String, dynamic> updatedData, String token) async {
+    final Uri url = Uri.parse("$userUrl/profile/update");
     try {
       final response = await http.put(
         url,
@@ -96,9 +114,12 @@ static Future<Map<String, dynamic>> loginUser(String email, String password) asy
       if (response.statusCode == 200) {
         return {"success": true, "message": "Profile updated successfully"};
       } else {
+        final decoded = safeJsonDecode(response.body);
+        print("Update Error Response: ${response.body}");
+        print("Update Status Code: ${response.statusCode}");
         return {
           "success": false,
-          "message": jsonDecode(response.body)["error"] ?? "Update failed"
+          "message": decoded?["error"] ?? "Update failed"
         };
       }
     } catch (e) {

@@ -1,13 +1,13 @@
 import 'package:Deals/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'api_service.dart'; // Import your API service
+import 'package:provider/provider.dart';
+import 'api_service.dart';
+import 'user_provider.dart';
 
 class Loginnnn extends StatefulWidget {
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
-
 
 class _AuthScreenState extends State<Loginnnn> {
   final _formKey = GlobalKey<FormState>();
@@ -19,46 +19,53 @@ class _AuthScreenState extends State<Loginnnn> {
   final TextEditingController passwordController = TextEditingController();
 
   void _submitForm() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => isLoading = true);
+    setState(() => isLoading = true);
 
-  String email = emailController.text.trim();
-  String password = passwordController.text.trim();
-  String name = nameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String name = nameController.text.trim();
 
-  Map<String, dynamic> response;
+    Map<String, dynamic> response;
 
-  if (isLogin) {
-    response = await ApiService.loginUser(email, password);
-  } else {
-    response = await ApiService.registerUser(name, email, password);
-  }
-
-  setState(() => isLoading = false);
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(response["message"])),
-  );
-
-  if (response["success"]) {
-    print(isLogin ? "User Logged In" : "User Registered");
-
-    // Save token and user data
-    final prefs = await SharedPreferences.getInstance();
-    if (response["token"] != null) {
-      await prefs.setString('token', response["token"]);
-      await prefs.setString('userName', response["user"]["name"]); // Save name
+    if (isLogin) {
+      response = await ApiService.loginUser(email, password);
+    } else {
+      response = await ApiService.registerUser(name, email, password);
     }
 
-    // Navigate to HomeScreen
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => HomeScreen()),
-    );
-  }
-}
+    setState(() => isLoading = false);
 
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(response["message"])));
+
+    if (response["success"]) {
+      if (isLogin) {
+        // Save user data and token using UserProvider
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        await userProvider.saveUser(response["user"], response["token"]);
+        print("User Logged In");
+      } else {
+        print("User Registered");
+        // After registration, automatically log in
+        response = await ApiService.loginUser(email, password);
+        if (response["success"]) {
+          final userProvider = Provider.of<UserProvider>(
+            context,
+            listen: false,
+          );
+          await userProvider.saveUser(response["user"], response["token"]);
+        }
+      }
+      // Navigate to Home Page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,32 +82,40 @@ class _AuthScreenState extends State<Loginnnn> {
                 TextFormField(
                   controller: nameController,
                   decoration: InputDecoration(labelText: "Name"),
-                  validator: (value) => value!.isEmpty ? "Enter your name" : null,
+                  validator:
+                      (value) => value!.isEmpty ? "Enter your name" : null,
                 ),
                 SizedBox(height: 10),
               ],
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(labelText: "Email"),
-                validator: (value) => value!.isEmpty ? "Enter a valid email" : null,
+                validator:
+                    (value) => value!.isEmpty ? "Enter a valid email" : null,
               ),
               SizedBox(height: 10),
               TextFormField(
                 controller: passwordController,
                 decoration: InputDecoration(labelText: "Password"),
                 obscureText: true,
-                validator: (value) => value!.length < 6 ? "Password must be 6+ chars" : null,
+                validator:
+                    (value) =>
+                        value!.length < 6 ? "Password must be 6+ chars" : null,
               ),
               SizedBox(height: 20),
               isLoading
                   ? CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: _submitForm,
-                      child: Text(isLogin ? "Login" : "Register"),
-                    ),
+                    onPressed: _submitForm,
+                    child: Text(isLogin ? "Login" : "Register"),
+                  ),
               TextButton(
                 onPressed: () => setState(() => isLogin = !isLogin),
-                child: Text(isLogin ? "Create an account" : "Already have an account? Login"),
+                child: Text(
+                  isLogin
+                      ? "Create an account"
+                      : "Already have an account? Login",
+                ),
               ),
             ],
           ),
@@ -109,3 +124,4 @@ class _AuthScreenState extends State<Loginnnn> {
     );
   }
 }
+
