@@ -1,5 +1,6 @@
 import 'package:Deals/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart'; // Import your API service
 
 class Loginnnn extends StatefulWidget {
@@ -18,34 +19,46 @@ class _AuthScreenState extends State<Loginnnn> {
   final TextEditingController passwordController = TextEditingController();
 
   void _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => isLoading = true);
+  setState(() => isLoading = true);
 
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-    String name = nameController.text.trim();
+  String email = emailController.text.trim();
+  String password = passwordController.text.trim();
+  String name = nameController.text.trim();
 
-    Map<String, dynamic> response;
+  Map<String, dynamic> response;
 
-    if (isLogin) {
-      response = await ApiService.loginUser(email, password);
-    } else {
-      response = await ApiService.registerUser(name, email, password);
-    }
-
-    setState(() => isLoading = false);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(response["message"])),
-    );
-
-    if (response["success"]) {
-      print(isLogin ? "User Logged In" : "User Registered");
-      // Navigate to Home Page (Example)
-       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
-    }
+  if (isLogin) {
+    response = await ApiService.loginUser(email, password);
+  } else {
+    response = await ApiService.registerUser(name, email, password);
   }
+
+  setState(() => isLoading = false);
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(response["message"])),
+  );
+
+  if (response["success"]) {
+    print(isLogin ? "User Logged In" : "User Registered");
+
+    // Save token and user data
+    final prefs = await SharedPreferences.getInstance();
+    if (response["token"] != null) {
+      await prefs.setString('token', response["token"]);
+      await prefs.setString('userName', response["user"]["name"]); // Save name
+    }
+
+    // Navigate to HomeScreen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => HomeScreen()),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:Deals/login/api_service.dart';
+import 'package:Deals/login/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
@@ -115,7 +116,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () =>
                         isEditing ? saveProfile() : setState(() => isEditing = true),
                     child: Text(isEditing ? "Save" : "Edit"),
-                  )
+                  ),
+                  ElevatedButton(
+  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+  onPressed: () async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => Loginnnn()),
+      (route) => false,
+    );
+  },
+  child: Text("Logout"),
+),
+
                 ],
               ),
             ),

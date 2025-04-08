@@ -1,11 +1,37 @@
+import 'package:Deals/login/profile_account.dart';
 import 'package:Deals/screen/bags_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/screen/wishlist_screen.dart';
 import 'package:Deals/login/login_page.dart';
 import 'package:Deals/screen/notifications_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserName();
+  }
+
+  Future<void> loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('userName');
+    setState(() {
+      userName = name;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,20 +104,52 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.person_outline, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-              context,
-              // herer i changed something
-              MaterialPageRoute(builder: (context) => Loginnnn()),
-            );
-          },
+        Row(
+          children: [
+            if (userName != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: Text(
+                  userName!,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            IconButton(
+              icon: const Icon(Icons.person_outline, color: Colors.black),
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                final token = prefs.getString('token');
+
+                if (token == null) {
+                  // Not logged in: go to login
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Loginnnn()),
+                  );
+
+                  if (result == true) {
+                    await loadUserName(); // Reload name after login
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
+                  }
+                } else {
+                  // Already logged in
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
+                }
+              },
+            ),
+          ],
         ),
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
