@@ -5,6 +5,6 @@ class BagsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Bags Section'));
+    return Center(child: Text('Bag se'));
   }
 }
