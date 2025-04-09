@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class BagsScreen extends StatelessWidget {
@@ -8,3 +9,7 @@ class BagsScreen extends StatelessWidget {
     return Center(child: Text('Bag se'));
   }
 }
+
+
+
+
