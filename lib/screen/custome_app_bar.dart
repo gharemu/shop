@@ -3,9 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:Deals/screen/wishlist_screen.dart';
 import 'package:Deals/login/login_page.dart';
 import 'package:Deals/screen/notifications_screen.dart';
+import 'package:Deals/login/api_service.dart'; // Add this import
+import 'package:Deals/screen/user_profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final String title;
+  final List<Widget>? actions;
+
+  const CustomAppBar({
+    super.key, 
+    required this.title,
+    this.actions,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +58,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      actions: [
+      actions: actions ?? [
         IconButton(
           icon: const Icon(Icons.notifications_outlined, color: Colors.black),
           onPressed: () {
@@ -78,13 +88,33 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
           },
         ),
+        // Update the person icon button in CustomAppBar
         IconButton(
           icon: const Icon(Icons.person_outline, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-              context,
-              // herer i changed something
+          onPressed: () async {
+            // Check if user is logged in
+            bool isLoggedIn = await ApiService.isLoggedIn();
+            if (isLoggedIn) {
+              // Navigate to profile screen if logged in
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Loginnnn()),
+              );
+            }
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.logout, color: Colors.black),
+          onPressed: () async {
+            await ApiService.logout();
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => Loginnnn()),
+              (route) => false,
             );
           },
         ),
