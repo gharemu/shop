@@ -19,6 +19,7 @@ class _Under999ScreenState extends State<Under999Screen> with SingleTickerProvid
   @override  
   void initState() {  
     super.initState();  
+    // do changes here 
     _products = _productService.getUnder999Products() as List<Product>;  
     _bannerController = AnimationController(  
       vsync: this,  
