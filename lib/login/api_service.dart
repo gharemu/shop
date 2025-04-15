@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:Deals/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String authUrl = "http://192.168.10.49:5000/api/auth";
   static const String userUrl = "http://192.168.10.49:5000/api/user";
+  // static const String baseUrl = 'http://192.168.10.50:5000/api';
 
   // Utility to safely decode JSON
   static dynamic safeJsonDecode(String body) {
@@ -126,4 +128,16 @@ class ApiService {
       return {"success": false, "message": "Error: $e"};
     }
   }
+
+  // //fetch products s
+  //   static Future<List<Product>> fetchAllProducts() async {
+  //   final response = await http.get(Uri.parse('$baseUrl/products'));
+
+  //   if (response.statusCode == 200) {
+  //     final List<dynamic> jsonList = jsonDecode(response.body);
+  //     return jsonList.map((e) => Product.fromJson(e)).toList();
+  //   } else {
+  //     throw Exception('Failed to fetch products');
+  //   }
+  // }
 }

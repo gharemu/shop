@@ -27,7 +27,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
 
-    // Simulate loading data
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
@@ -49,7 +48,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         _isLoading = true;
       });
 
-      // Simulate loading data when switching tabs
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           setState(() {
@@ -114,69 +112,77 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         ],
       ),
-      floatingActionButton:
-          _showBackToTopButton
-              ? FloatingActionButton(
-                mini: true,
-                backgroundColor: const Color(0xFFFF3E6C),
-                child: const Icon(Icons.arrow_upward),
-                onPressed: _scrollToTop,
-              )
-              : null,
+      floatingActionButton: _showBackToTopButton
+          ? FloatingActionButton(
+              mini: true,
+              backgroundColor: const Color(0xFFFF3E6C),
+              child: const Icon(Icons.arrow_upward),
+              onPressed: _scrollToTop,
+            )
+          : null,
     );
   }
 
-  Widget _buildProductGrid(List<Product> products) {
-    if (_isLoading) {
-      return _buildLoadingGrid();
-    }
-
-    if (products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.category_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              "No products available in this category",
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      color: const Color(0xFFFF3E6C),
-      onRefresh: () async {
-        setState(() {
-          _isLoading = true;
-        });
-
-        // Simulate refresh
-        await Future.delayed(const Duration(milliseconds: 800));
-
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
+  Widget _buildProductGrid(Future<List<Product>> futureProducts) {
+    return FutureBuilder<List<Product>>(
+      future: futureProducts,
+      builder: (context, snapshot) {
+        if (_isLoading || snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingGrid();
         }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('❌ Error: ${snapshot.error}'));
+        }
+
+        final products = snapshot.data ?? [];
+
+        if (products.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.category_outlined, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  "No products available in this category",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          color: const Color(0xFFFF3E6C),
+          onRefresh: () async {
+            setState(() {
+              _isLoading = true;
+            });
+
+            await Future.delayed(const Duration(milliseconds: 800));
+
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+          child: MasonryGridView.count(
+            controller: _scrollController,
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            padding: const EdgeInsets.all(10),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              double heightFactor =
+                  index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
+              return _buildProductCard(products[index], heightFactor);
+            },
+          ),
+        );
       },
-      child: MasonryGridView.count(
-        controller: _scrollController,
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        padding: const EdgeInsets.all(10),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          // Add staggered effect with slightly different heights
-          double heightFactor =
-              index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
-          return _buildProductCard(products[index], heightFactor);
-        },
-      ),
     );
   }
 
@@ -241,25 +247,16 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder:
-                    (context, animation, secondaryAnimation) =>
-                        ProductDetailScreen(product: product),
-                transitionsBuilder: (
-                  context,
-                  animation,
-                  secondaryAnimation,
-                  child,
-                ) {
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    ProductDetailScreen(product: product),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
                   const begin = Offset(0.0, 0.05);
                   const end = Offset.zero;
                   const curve = Curves.easeInOut;
-                  var tween = Tween(
-                    begin: begin,
-                    end: end,
-                  ).chain(CurveTween(curve: curve));
-                  var offsetAnimation = animation.drive(tween);
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
                   return SlideTransition(
-                    position: offsetAnimation,
+                    position: animation.drive(tween),
                     child: child,
                   );
                 },
@@ -286,38 +283,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         height: 180 * heightFactor,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 180 * heightFactor,
-                            decoration: BoxDecoration(color: Colors.grey[200]),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value:
-                                    loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Color(0xFFFF3E6C),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 180 * heightFactor,
-                            decoration: BoxDecoration(color: Colors.grey[200]),
-                            child: const Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
                       ),
                     ),
                     Positioned(
@@ -328,9 +293,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           setState(() {
                             product.isFavorite = !product.isFavorite;
                           });
-
-                          // Animated feedback
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Row(
@@ -349,10 +311,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   ),
                                 ],
                               ),
-                              backgroundColor:
-                                  product.isFavorite
-                                      ? const Color(0xFFFF3E6C)
-                                      : Colors.grey[700],
+                              backgroundColor: product.isFavorite
+                                  ? const Color(0xFFFF3E6C)
+                                  : Colors.grey[700],
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
@@ -361,42 +322,13 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                             ),
                           );
                         },
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: product.isFavorite ? 0.0 : 1.0,
-                            end: product.isFavorite ? 1.0 : 0.0,
-                          ),
-                          duration: const Duration(milliseconds: 300),
-                          builder: (context, value, child) {
-                            return Transform.scale(
-                              scale: 1.0 + (value * 0.2),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 2,
-                                      spreadRadius: 1,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  product.isFavorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color:
-                                      product.isFavorite
-                                          ? const Color(0xFFFF3E6C)
-                                          : Colors.grey[600],
-                                  size: 20,
-                                ),
-                              ),
-                            );
-                          },
+                        child: Icon(
+                          product.isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: product.isFavorite
+                              ? const Color(0xFFFF3E6C)
+                              : Colors.grey[600],
                         ),
                       ),
                     ),
@@ -405,10 +337,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         bottom: 0,
                         left: 0,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: const BoxDecoration(
                             color: Color(0xFFFF3E6C),
                             borderRadius: BorderRadius.only(
@@ -430,10 +359,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         top: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.green[600],
                             borderRadius: BorderRadius.circular(4),
@@ -455,40 +381,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              product.brand,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (product.rating > 0)
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  size: 14,
-                                  color: Colors.amber[700],
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  product.rating.toString(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
+                      Text(product.brand,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14)),
                       const SizedBox(height: 4),
                       Text(
                         product.name,
@@ -502,9 +397,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           Text(
                             "₹${product.discountedPrice}",
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                                fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           const SizedBox(width: 4),
                           if (product.discount > 0)
@@ -517,57 +410,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                               ),
                             ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Material(
-                        borderRadius: BorderRadius.circular(4),
-                        color: const Color(0xFFFF3E6C).withOpacity(0.1),
-                        child: InkWell(
-                          onTap: () {
-                            // Animated feedback for add to cart
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.shopping_bag,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text("Added to cart"),
-                                  ],
-                                ),
-                                backgroundColor: const Color(0xFF4CAF50),
-                                duration: const Duration(seconds: 1),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                action: SnackBarAction(
-                                  label: "VIEW",
-                                  textColor: Colors.white,
-                                  onPressed: () {
-                                    // Navigate to cart
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(4),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            alignment: Alignment.center,
-                            child: Text(
-                              "ADD TO CART",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: const Color(0xFFFF3E6C),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
                       ),
                     ],
                   ),
