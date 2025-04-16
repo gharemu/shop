@@ -155,7 +155,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   case 'login':
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Loginnnn()),
+                      MaterialPageRoute(builder: (context) => AuthScreen()),
                     );
                     break;
                   case 'logout':

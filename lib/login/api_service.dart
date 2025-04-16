@@ -3,9 +3,9 @@ import 'package:Deals/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String authUrl = "http://192.168.10.49:5000/api/auth";
-  static const String userUrl = "http://192.168.10.49:5000/api/user";
-  // static const String baseUrl = 'http://192.168.10.50:5000/api';
+  static const String authUrl = "http://192.168.10.50:5000/api/auth";
+  static const String userUrl = "http://192.168.10.50:5000/api/user";
+  static const String cartUrl = "http://192.168.10.50:5000/api/cart"; // Base URL for cart API
 
   // Utility to safely decode JSON
   static dynamic safeJsonDecode(String body) {
@@ -117,8 +117,6 @@ class ApiService {
         return {"success": true, "message": "Profile updated successfully"};
       } else {
         final decoded = safeJsonDecode(response.body);
-        print("Update Error Response: ${response.body}");
-        print("Update Status Code: ${response.statusCode}");
         return {
           "success": false,
           "message": decoded?["error"] ?? "Update failed"
@@ -129,15 +127,121 @@ class ApiService {
     }
   }
 
-  // //fetch products s
-  //   static Future<List<Product>> fetchAllProducts() async {
-  //   final response = await http.get(Uri.parse('$baseUrl/products'));
+  // ADD TO CART
+static Future<Map<String, dynamic>> addToCart(
+  Product product,
+  int quantity,
+  String token,
+) async {
+  final url = Uri.parse("http://192.168.10.50:5000/api/cartadd");
 
-  //   if (response.statusCode == 200) {
-  //     final List<dynamic> jsonList = jsonDecode(response.body);
-  //     return jsonList.map((e) => Product.fromJson(e)).toList();
-  //   } else {
-  //     throw Exception('Failed to fetch products');
-  //   }
-  // }
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "product_id": product.id,
+        "quantity": quantity,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return {"success": true, "message": "Added to cart", "statusCode": 200};
+    } else {
+      final decoded = safeJsonDecode(response.body);
+      return {
+        "success": false,
+        "message": decoded?["error"] ?? "Failed to add to cart",
+        "statusCode": response.statusCode
+      };
+    }
+  } catch (e) {
+    return {
+      "success": false,
+      "message": "Error: $e",
+      "statusCode": 500,
+    };
+  }
+}
+
+
+  // GET CART ITEMS
+  static Future<Map<String, dynamic>> getCartItems() async {
+    final token = await getToken();
+    if (token == null) {
+      return {"statusCode": 401, "message": "User not logged in"};
+    }
+
+    final Uri url = Uri.parse("$cartUrl/cartget");
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = safeJsonDecode(response.body);
+        return {"statusCode": response.statusCode, "data": data};
+      } else {
+        final decoded = safeJsonDecode(response.body);
+        return {
+          "statusCode": response.statusCode,
+          "message": decoded?["error"] ?? "Error fetching cart items",
+        };
+      }
+    } catch (e) {
+      return {
+        "statusCode": 500,
+        "message": "Error fetching cart items: $e",
+      };
+    }
+  }
+
+  // REMOVE ITEM FROM CART
+  static Future<Map<String, dynamic>> removeFromCart(int itemId) async {
+    final token = await getToken();
+    if (token == null) {
+      return {"statusCode": 401, "message": "User not logged in"};
+    }
+
+    final Uri url = Uri.parse("$cartUrl/cartdel/$itemId");
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          "statusCode": response.statusCode,
+          "message": "Removed from cart successfully",
+        };
+      } else {
+        final decoded = safeJsonDecode(response.body);
+        return {
+          "statusCode": response.statusCode,
+          "message": decoded?["error"] ?? "Error removing item from cart",
+        };
+      }
+    } catch (e) {
+      return {
+        "statusCode": 500,
+        "message": "Error removing item from cart: $e",
+      };
+    }
+  }
+
+  // Helper method to get the stored token
+  static Future<String?> getToken() async {
+    // Retrieve the token from shared preferences, secure storage, etc.
+    // Example: return await SharedPreferences.getInstance().then((prefs) => prefs.getString("auth_token"));
+    return null; // Placeholder: Implement your token retrieval logic here
+  }
 }

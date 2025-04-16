@@ -4,12 +4,12 @@ import 'package:provider/provider.dart';
 import 'api_service.dart';
 import 'user_provider.dart';
 
-class Loginnnn extends StatefulWidget {
+class AuthScreen extends StatefulWidget {
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<Loginnnn> {
+class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isLogin = true;
   bool isLoading = false;
@@ -37,9 +37,9 @@ class _AuthScreenState extends State<Loginnnn> {
 
     setState(() => isLoading = false);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(response["message"])));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(response["message"])),
+    );
 
     if (response["success"]) {
       if (isLogin) {
@@ -70,58 +70,342 @@ class _AuthScreenState extends State<Loginnnn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(isLogin ? "Login" : "Register")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!isLogin) ...[
-                TextFormField(
-                  controller: nameController,
-                  decoration: InputDecoration(labelText: "Name"),
-                  validator:
-                      (value) => value!.isEmpty ? "Enter your name" : null,
-                ),
-                SizedBox(height: 10),
-              ],
-              TextFormField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: "Email"),
-                validator:
-                    (value) => value!.isEmpty ? "Enter a valid email" : null,
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: "Password"),
-                obscureText: true,
-                validator:
-                    (value) =>
-                        value!.length < 6 ? "Password must be 6+ chars" : null,
-              ),
-              SizedBox(height: 20),
-              isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                    onPressed: _submitForm,
-                    child: Text(isLogin ? "Login" : "Register"),
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFE91E63),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-              TextButton(
-                onPressed: () => setState(() => isLogin = !isLogin),
-                child: Text(
-                  isLogin
-                      ? "Create an account"
-                      : "Already have an account? Login",
+                  child: Center(
+                    child: Text(
+                      'M',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 50,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 40),
+                
+                // White card container
+                Container(
+                  width: double.infinity,
+                  constraints: BoxConstraints(maxWidth: 400),
+                  margin: EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Form title
+                        Text(
+                          isLogin ? "Sign-In" : "Create account",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        
+                        // Name field (only for register)
+                        if (!isLogin) ...[
+                          Text(
+                            "Your Name",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          TextFormField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              hintText: "Enter your name",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                            ),
+                            validator: (value) => 
+                                value!.isEmpty ? "Enter your name" : null,
+                          ),
+                          SizedBox(height: 20),
+                        ],
+                        
+                        // Email field
+                        Text(
+                          "Email",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: "Enter your email",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Email is required";
+                            }
+                            bool emailValid = RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value);
+                            return emailValid ? null : "Enter a valid email";
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        
+                        // Password field
+                        Text(
+                          "Password",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            hintText: "Enter your password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                          ),
+                          validator: (value) => value!.length < 6
+                              ? "Password must be at least 6 characters"
+                              : null,
+                        ),
+                        SizedBox(height: 30),
+                        
+                        // Submit button
+                        isLoading
+                            ? Center(child: CircularProgressIndicator())
+                            : ElevatedButton(
+                                onPressed: _submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFFF80AB),
+                                  minimumSize: Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                child: Text(
+                                  isLogin
+                                      ? "Continue"
+                                      : "Create your ecomm account",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                        
+                        // Terms text (login only)
+                        if (isLogin) ...[
+                          SizedBox(height: 20),
+                          Text(
+                            "By continuing, you agree to ecomm",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  "Conditions of Use",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                " and ",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  "Privacy Notice",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                ".",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Divider
+                Container(
+                  constraints: BoxConstraints(maxWidth: 400),
+                  margin: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Divider(
+                    color: Colors.grey.shade300,
+                    thickness: 1,
+                  ),
+                ),
+                
+                // Switch between login and register
+                Text(
+                  isLogin ? "New to ecomm?" : "Already have an account?",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 12),
+                
+                // Action button
+                Container(
+                  width: double.infinity,
+                  constraints: BoxConstraints(maxWidth: 400),
+                  margin: EdgeInsets.symmetric(horizontal: 24),
+                  child: OutlinedButton(
+                    onPressed: () => setState(() => isLogin = !isLogin),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: Text(
+                      isLogin
+                          ? "Create your ecomm account"
+                          : "Sign in to your account",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
