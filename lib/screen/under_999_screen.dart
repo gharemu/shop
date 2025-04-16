@@ -273,7 +273,7 @@ class _Under999ScreenState extends State<Under999Screen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product.brand,
+                          product.name,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -283,7 +283,7 @@ class _Under999ScreenState extends State<Under999Screen>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          product.name,
+                          product.description,
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -303,7 +303,7 @@ class _Under999ScreenState extends State<Under999Screen>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "₹${product.originalPrice}",
+                              "₹${product.oldPrice}",
                               style: TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 12,

@@ -93,9 +93,30 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 indicatorWeight: 3,
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                 tabs: const [
-                  Tab(text: 'MEN'),
-                  Tab(text: 'WOMEN'),
-                  Tab(text: 'KIDS'),
+                  Tab(
+                    icon: Image(
+                      image: AssetImage('assets/images/shirt1.jpg'),
+                      width: 24,
+                      height: 50,
+                    ),
+                    text: 'MEN',
+                  ),
+                  Tab(
+                    icon: Image(
+                      image: AssetImage('assets/images/top1.jpg'),
+                      width: 24,
+                      height: 50,
+                    ),
+                    text: 'WOMEN',
+                  ),
+                  Tab(
+                    icon: Image(
+                      image: AssetImage('assets/images/kurta3.jpg'),
+                      width: 24,
+                      height: 50,
+                    ),
+                    text: 'KIDS',
+                  ),
                 ],
               ),
             ),
@@ -112,14 +133,15 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         ],
       ),
-      floatingActionButton: _showBackToTopButton
-          ? FloatingActionButton(
-              mini: true,
-              backgroundColor: const Color(0xFFFF3E6C),
-              child: const Icon(Icons.arrow_upward),
-              onPressed: _scrollToTop,
-            )
-          : null,
+      floatingActionButton:
+          _showBackToTopButton
+              ? FloatingActionButton(
+                mini: true,
+                backgroundColor: const Color(0xFFFF3E6C),
+                child: const Icon(Icons.arrow_upward),
+                onPressed: _scrollToTop,
+              )
+              : null,
     );
   }
 
@@ -142,7 +164,11 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.category_outlined, size: 64, color: Colors.grey[400]),
+                Icon(
+                  Icons.category_outlined,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
                 const SizedBox(height: 16),
                 Text(
                   "No products available in this category",
@@ -247,14 +273,22 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    ProductDetailScreen(product: product),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                pageBuilder:
+                    (context, animation, secondaryAnimation) =>
+                        ProductDetailScreen(product: product),
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) {
                   const begin = Offset(0.0, 0.05);
                   const end = Offset.zero;
                   const curve = Curves.easeInOut;
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
+                  var tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
                   return SlideTransition(
                     position: animation.drive(tween),
                     child: child,
@@ -311,9 +345,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   ),
                                 ],
                               ),
-                              backgroundColor: product.isFavorite
-                                  ? const Color(0xFFFF3E6C)
-                                  : Colors.grey[700],
+                              backgroundColor:
+                                  product.isFavorite
+                                      ? const Color(0xFFFF3E6C)
+                                      : Colors.grey[700],
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
@@ -326,9 +361,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           product.isFavorite
                               ? Icons.favorite
                               : Icons.favorite_border,
-                          color: product.isFavorite
-                              ? const Color(0xFFFF3E6C)
-                              : Colors.grey[600],
+                          color:
+                              product.isFavorite
+                                  ? const Color(0xFFFF3E6C)
+                                  : Colors.grey[600],
                         ),
                       ),
                     ),
@@ -337,7 +373,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         bottom: 0,
                         left: 0,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: const BoxDecoration(
                             color: Color(0xFFFF3E6C),
                             borderRadius: BorderRadius.only(
@@ -359,7 +398,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         top: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green[600],
                             borderRadius: BorderRadius.circular(4),
@@ -381,12 +423,16 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(product.brand,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(height: 4),
                       Text(
                         product.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        product.description,
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -397,12 +443,14 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           Text(
                             "₹${product.discountedPrice}",
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           if (product.discount > 0)
                             Text(
-                              "₹${product.originalPrice}",
+                              "₹${product.oldPrice}",
                               style: TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 12,

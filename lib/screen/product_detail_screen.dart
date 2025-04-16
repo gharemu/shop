@@ -117,12 +117,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.product.brand,
+            widget.product.name,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            widget.product.name,
+            widget.product.description,
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
@@ -169,7 +169,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "₹${widget.product.originalPrice}",
+                "₹${widget.product.oldPrice}",
                 style: TextStyle(
                   decoration: TextDecoration.lineThrough,
                   fontSize: 16,

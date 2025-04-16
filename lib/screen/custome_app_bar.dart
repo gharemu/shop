@@ -1,3 +1,4 @@
+// custom_app_bar.dart
 import 'package:Deals/screen/bags_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/screen/wishlist_screen.dart';
@@ -6,6 +7,7 @@ import 'package:Deals/screen/notifications_screen.dart';
 import 'package:Deals/login/user_provider.dart';
 import 'package:Deals/login/profile_account.dart';
 import 'package:provider/provider.dart';
+import 'package:Deals/screen/serach_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -51,18 +53,39 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search for products, brands and more",
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search, color: Colors.grey),
+                        Expanded(
+                          child: Text(
+                            "Search for products, brands and more",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -114,10 +137,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         radius: 14,
                         child: Text(
                           userName.isNotEmpty ? userName[0].toUpperCase() : "U",
-                          style: TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
                       )
-                      : Icon(Icons.person_outline, color: Colors.black),
+                      : const Icon(Icons.person_outline, color: Colors.black),
               onSelected: (value) {
                 switch (value) {
                   case 'profile':
@@ -135,7 +161,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   case 'logout':
                     userProvider.logout();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Logged out successfully")),
+                      const SnackBar(content: Text("Logged out successfully")),
                     );
                     break;
                 }
@@ -147,15 +173,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         value: 'profile',
                         child: Row(
                           children: [
-                            Icon(Icons.person),
-                            SizedBox(width: 8),
+                            const Icon(Icons.person),
+                            const SizedBox(width: 8),
                             Text("Profile - $userName"),
                           ],
                         ),
                       ),
                       PopupMenuItem(
                         value: 'logout',
-                        child: Row(
+                        child: const Row(
                           children: [
                             Icon(Icons.logout),
                             SizedBox(width: 8),
@@ -166,7 +192,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ] else
                       PopupMenuItem(
                         value: 'login',
-                        child: Row(
+                        child: const Row(
                           children: [
                             Icon(Icons.login),
                             SizedBox(width: 8),
@@ -185,4 +211,3 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-
