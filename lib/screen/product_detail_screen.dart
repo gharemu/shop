@@ -1,10 +1,16 @@
+import 'package:Deals/screen/bags_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
+import 'package:Deals/services/product_service.dart';
+import 'package:Deals/login/api_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
+    final String userToken;
 
-  const ProductDetailScreen({super.key, required this.product});
+
+  const ProductDetailScreen({super.key, required this.product,     required this.userToken
+});
 
   @override
   _ProductDetailScreenState createState() => _ProductDetailScreenState();
@@ -14,6 +20,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _selectedSize = 0;
   int _selectedColor = 0;
   int _quantity = 1;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -834,9 +842,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              onPressed: () {
-                // Add to cart
-              },
+              
+             
+ onPressed: () async {
+  try {
+    // Use the widget.product instead of selectedProduct
+    await ProductService.addToCart(int.parse(widget.product.id), _quantity, userToken);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Item added to cart')),
+    );
+
+    // Navigate to BagScreen with the current token
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BagScreen(
+          token: userToken, // You need to define userToken in your class
+          productToAdd: widget.product,
+        ),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to add product to cart: $e')),
+    );
+  }
+},
+
+
+},
+
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -122,12 +122,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Icons.shopping_bag_outlined,
                 color: Colors.black,
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const BagsScreen()),
-                );
-              },
+           onPressed: () {
+  final token = userProvider.user?["token"] ?? "";
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => BagScreen(token: token)),
+  );
+},
+
             ),
             PopupMenuButton(
               icon:

@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const CategoriesScreen(), // Main category screen
     const Under999Screen(),     // Under 999 screen
     CategoryPage(),             // Luxury section
-    const BagsScreen(),         // Bags section
+    const BagScreen(token: 'id',),         // Bags section
   ];
 
   void _onItemTapped(int index) {
