@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class Product with ChangeNotifier {
   final String id;
+  int quantity; // ✅ Made mutable
   final String name;
   final String brand;
   final String description;
@@ -23,6 +24,7 @@ class Product with ChangeNotifier {
 
   Product({
     required this.id,
+    required this.quantity, // ✅ Initialize here
     required this.name,
     required this.brand,
     required this.description,
@@ -67,40 +69,33 @@ class Product with ChangeNotifier {
       'rating': rating,
       'reviews': reviews,
       'is_new': isNew,
+      'quantity': quantity, // ✅ Include quantity in JSON
     };
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id'].toString(), // ✅ Ensures string
-      name: json['name'] ?? '',
-      brand: json['brand'] ?? 'Unknown',
-      description: json['description'] ?? '',
-      category: json['category'] ?? '',
-      parentCategory: json['parent_category'] ?? '',
-      subCategory: json['sub_category'] ?? '',
-      oldPrice: _toDouble(json['old_price']),
-      discountedPrice: _toDouble(json['discount_price']),
-      originalPrice: json['original_price'] != null ? _toDouble(json['original_price']) : null,
-      discount: _toInt(json['discount']),
-      imageUrl: json['image'] ?? '',
-      additionalImages: (json['additional_images'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      sizes: (json['sizes'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      colors: (json['colors'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      rating: _toDouble(json['rating']),
-      reviews: _toInt(json['reviews']),
-      isNew: json['is_new'] == true || json['is_new'] == 'true',
-    );
-  }
+  return Product(
+    id: json['id'].toString(),
+    quantity: _toInt(json['quantity'] ?? 1), // Default to 1 if quantity is null
+    name: json['name'] ?? '',
+    brand: json['brand'] ?? 'Unknown',
+    description: json['description'] ?? '',
+    category: json['category'] ?? '',
+    parentCategory: json['parent_category'] ?? '',
+    subCategory: json['sub_category'] ?? '',
+    oldPrice: _toDouble(json['old_price']),
+    discountedPrice: _toDouble(json['discount_price']),
+    originalPrice: json['original_price'] != null ? _toDouble(json['original_price']) : null,
+    discount: _toInt(json['discount']),
+    imageUrl: json['image'] ?? '',
+    additionalImages: (json['additional_images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    sizes: (json['sizes'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    rating: _toDouble(json['rating']),
+    reviews: _toInt(json['reviews']),
+    isNew: json['is_new'] == true || json['is_new'] == 'true',
+  );
+}
 
   static double _toDouble(dynamic value) {
     if (value == null) return 0.0;

@@ -215,6 +215,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                           ProductDetailScreen(product: product),
                                   transitionsBuilder: (
                                     context,
+
+                                    
                                     animation,
                                     secondaryAnimation,
                                     child,

@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:Deals/login/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:Deals/models/product.dart';
 
 class ProductService {
   final String baseUrl =
-      "http://192.168.10.41:5000/api"; // Replace with your actual backend API URL
+      "http://192.168.10.64:5000/api"; // Replace with your actual backend API URL
 
   // Fetch Men products
   Future<List<Product>> getMenProducts() async {
@@ -189,9 +190,10 @@ class ProductService {
 
  // Replace with your actual backend API URL
   // Static method to add an item to the cart
-  static Future<void> addToCart(int productId, int quantity, String token) async {
+ static Future<void> addToCart(String productId, int quantity, String token) async {
+  try {
     final response = await http.post(
-      Uri.parse('http://192.168.10.41:5000/api/cartadd'),
+      Uri.parse('http://192.168.10.64:5000/api/cart/cartadd'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token', // Authorization header with JWT token
@@ -205,31 +207,93 @@ class ProductService {
     if (response.statusCode == 200) {
       print('Item added to cart');
     } else {
+      // Log the response body to help debug the error
+      print('Failed to add item to cart. Response: ${response.body}');
       throw Exception('Failed to add item to cart');
     }
+  } catch (e) {
+    // Log any other errors
+    print('Error while adding to cart: $e');
+    print("Using token: $token");
+
+    throw Exception('Failed to add item to cart: $e');
+    
   }
+}
+
 
   // Static method to get Cart Items
-  static Future<List<Product>> getCartItems(String token) async {
+static Future<List<Product>> getCartItems() async {
+  String? token = await ApiService.getToken();
+
+  if (token == null || token.isEmpty) {
+    print("Error: No token found. User may not be logged in.");
+    throw Exception('No token found. User may not be logged in.');
+  }
+
+  final url = Uri.parse('http://192.168.10.64:5000/api/cart/cartget');
+  print("Using token: $token");
+
+  try {
     final response = await http.get(
-      Uri.parse('http://192.168.10.41:5000/api/cartget'),
+      url,
       headers: {
-        'Authorization': 'Bearer $token', // Authorization header with JWT token
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
       },
     );
 
+    // Debugging: print the raw response body to inspect the structure
+    print("Response body: ${response.body}");
+
     if (response.statusCode == 200) {
-      List jsonData = json.decode(response.body);
-      return jsonData.map((item) => Product.fromJson(item)).toList();
+      final List<dynamic> cartItems = json.decode(response.body);
+
+      // Safely map the response to Product instances
+      return cartItems.map<Product>((item) {
+        // Ensure each item is a map and has the necessary 'product' key
+        final Map<String, dynamic> productJson = {
+          'id': item['product_id'].toString(),
+          'quantity': item['quantity'] ?? 1,  // Default to 1 if quantity is missing
+          'name': item['product_name'] ?? '',
+          'brand': 'Unknown',  // You may want to handle this as needed
+          'description': '',  // You can add the description or other info as needed
+          'category': '',  // Handle category if it's available in your app
+          'parentCategory': '',  // Similarly handle this if needed
+          'subCategory': '',  // Handle sub-category if required
+          'oldPrice': (item['product_price']),
+          'discountedPrice': (item['product_price']),  // Assuming no discount for now
+          'imageUrl': item['product_image'] ?? '',
+          'additionalImages': [],  // Adjust this if there are additional images
+          'sizes': [],  // Adjust this as needed
+          'colors': [],  // Adjust this as needed
+          'rating': 0.0,  // Adjust this if ratings are provided
+          'reviews': 0,  // Adjust this if reviews are provided
+          'isNew': false,  // Adjust this if needed
+        };
+
+        // Ensure 'quantity' exists or default to 1
+        if (productJson['quantity'] == null) {
+          productJson['quantity'] = 1;  // Default to 1 if missing
+        }
+
+        return Product.fromJson(productJson);
+      }).toList();
     } else {
-      throw Exception('Failed to load cart items');
+      print("Failed to load cart items: ${response.statusCode} - ${response.body}");
+      throw Exception('Failed to load cart items: ${response.statusCode} - ${response.body}');
     }
+  } catch (e) {
+    print("Error fetching cart items: $e");
+    throw Exception('Error fetching cart items: $e');
   }
+}
+
 
   // Static method to remove item from Cart
   static Future<void> removeFromCart(int itemId, String token) async {
     final response = await http.delete(
-      Uri.parse('http://192.168.10.41:5000/api/cartdel/$itemId'),
+      Uri.parse('http://192.168.10.64:5000/api/cart/cartdel/$itemId'),
       headers: {
         'Authorization': 'Bearer $token', // Authorization header with JWT token
       },

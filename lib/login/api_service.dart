@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:Deals/models/product.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String authUrl = "http://192.168.10.41:5000/api/auth";
-  static const String userUrl = "http://192.168.10.41:5000/api/user";
-  // static const String baseUrl = 'http://192.168.10.50:5000/api';
-
+  static const String authUrl = "http://192.168.10.64:5000/api/auth";
+  static const String userUrl = "http://192.168.10.64:5000/api/user";
+  static const String TOKEN_KEY = "user_token";
+  static const String USER_DATA_KEY = "user_data";
+  
   // Utility to safely decode JSON
   static dynamic safeJsonDecode(String body) {
     try {
@@ -54,6 +56,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = safeJsonDecode(response.body);
+        
+        // Save token and user data to shared preferences
+        await saveToken(data["token"]);
+        await saveUserData(data["user"]);
+        
         return {
           "success": true,
           "message": "Login successful",
@@ -129,16 +136,48 @@ class ApiService {
     }
   }
 
+  // TOKEN MANAGEMENT METHODS
 
-  // //fetch products s
-  //   static Future<List<Product>> fetchAllProducts() async {
-  //   final response = await http.get(Uri.parse('$baseUrl/products'));
+  // Save token to shared preferences
+  static Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(TOKEN_KEY, token);
+  }
 
-  //   if (response.statusCode == 200) {
-  //     final List<dynamic> jsonList = jsonDecode(response.body);
-  //     return jsonList.map((e) => Product.fromJson(e)).toList();
-  //   } else {
-  //     throw Exception('Failed to fetch products');
-  //   }
-  // }
+  // Get token from shared preferences
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(TOKEN_KEY);
+  }
+
+  // Check if user is logged in
+  static Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  // Clear token (logout)
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(TOKEN_KEY);
+    await prefs.remove(USER_DATA_KEY);
+  }
+
+  // USER DATA MANAGEMENT
+
+  // Save user data
+  static Future<void> saveUserData(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(USER_DATA_KEY, jsonEncode(userData));
+  }
+
+  // Get user data
+  static Future<Map<String, dynamic>?> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString(USER_DATA_KEY);
+    if (userData != null) {
+      return jsonDecode(userData) as Map<String, dynamic>;
+    }
+    return null;
+  }
 }

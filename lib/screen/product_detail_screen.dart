@@ -1,16 +1,13 @@
+import 'package:Deals/login/api_service.dart';
 import 'package:Deals/screen/bags_screen.dart';
+import 'package:Deals/services/product_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
-import 'package:Deals/services/product_service.dart';
-import 'package:Deals/login/api_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
-    final String userToken;
 
-
-  const ProductDetailScreen({super.key, required this.product,     required this.userToken
-});
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   _ProductDetailScreenState createState() => _ProductDetailScreenState();
@@ -20,8 +17,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _selectedSize = 0;
   int _selectedColor = 0;
   int _quantity = 1;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -834,45 +829,52 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF3E6C),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              
-             
- onPressed: () async {
+       onPressed: () async {
   try {
-    // Use the widget.product instead of selectedProduct
-    await ProductService.addToCart(int.parse(widget.product.id), _quantity, userToken);
-    
+    final userToken = await ApiService.getToken();
+    if (userToken == null || userToken.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User not logged in!")),
+      );
+      return; // Exit if no valid token is found
+    }
+
+    final productId = (widget.product.id);
+    if (productId == null) throw Exception("Invalid product ID");
+
+    // Add product to cart
+    await ProductService.addToCart(productId, 1, userToken); // quantity = 1 for now
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Item added to cart')),
+      const SnackBar(content: Text("Added to cart!")),
     );
 
-    // Navigate to BagScreen with the current token
+    // Navigate to BagScreen after adding
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => BagScreen(
-          token: userToken, // You need to define userToken in your class
+          token: userToken, // Pass the token to the BagScreen
           productToAdd: widget.product,
         ),
       ),
     );
   } catch (e) {
+    print(e); // Print the error in the console for debugging
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to add product to cart: $e')),
+      SnackBar(content: Text("Failed to add to cart: $e")), // Show error in UI
     );
   }
 },
 
 
-},
-
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -880,7 +882,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(width: 8),
                   Text(
                     "ADD TO BAG",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),

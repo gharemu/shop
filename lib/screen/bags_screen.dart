@@ -1,93 +1,89 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
 import 'package:Deals/services/product_service.dart';
 
 class BagScreen extends StatefulWidget {
-  final String token; // JWT token for API authentication
-  final Product? productToAdd; // Product to add to the bag (optional)
+  final String? token;
+  final Product? productToAdd;
 
-  const BagScreen({
-    super.key,
-    required this.token,
-    this.productToAdd,
-  });
+  const BagScreen({super.key, this.token, this.productToAdd});
 
   @override
-  _BagScreenState createState() => _BagScreenState();
+  State<BagScreen> createState() => _BagScreenState();
 }
 
 class _BagScreenState extends State<BagScreen> {
   List<Product> cartItems = [];
+  double cartTotal = 0;
   bool isLoading = true;
-  bool isRemoving = false;
 
   @override
   void initState() {
     super.initState();
-
-    if (widget.productToAdd != null) {
-      _addProductAndFetchCart(widget.productToAdd!);
-    } else {
-      _fetchCartItems();
-    }
+    fetchCartItems();
   }
 
-  Future<void> _addProductAndFetchCart(Product product) async {
+  Future<void> fetchCartItems() async {
     setState(() => isLoading = true);
 
     try {
-      await ProductService.addToCart(
-        int.parse(product.id),
-        1,
-        widget.token,
-      );
-      await _fetchCartItems();
+      // Add product if passed
+      if (widget.productToAdd != null && widget.token != null) {
+        await ProductService.addToCart(widget.productToAdd!.id, 1, widget.token!);
+      }
+
+      // Get cart items using token
+      if (widget.token != null) {
+        final items = await ProductService.getCartItems();
+        setState(() {
+          cartItems = items;
+        });
+      }
+
+      calculateTotal();
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add item to cart: $e')),
-      );
     }
   }
 
-  Future<void> _fetchCartItems() async {
-    setState(() => isLoading = true);
+  void calculateTotal() {
+    cartTotal = cartItems.fold(
+      0.0,
+      (sum, item) => sum + (item.discountedPrice * (item.quantity ?? 1)),
+    );
+  }
+
+  void updateQuantity(Product item, int delta) async {
+    final newQty = (item.quantity ?? 1) + delta;
+    if (newQty < 1 || newQty > 10) return;
 
     try {
-      List<Product> items = await ProductService.getCartItems(widget.token);
-      setState(() {
-        cartItems = items;
-        isLoading = false;
-      });
+      if (widget.token != null) {
+        await ProductService.addToCart(item.id, delta, widget.token!); // Pass the token
+        setState(() {
+          item.quantity = newQty;
+          calculateTotal();
+        });
+      }
     } catch (e) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load cart: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update quantity")));
     }
   }
 
-  Future<void> _removeFromCart(dynamic itemId) async {
-    setState(() => isRemoving = true);
-
+  void removeItem(Product item) async {
     try {
-      int itemIdInt = int.tryParse(itemId.toString()) ?? 0;
-
-      await ProductService.removeFromCart(itemIdInt, widget.token);
-
-      setState(() {
-        cartItems.removeWhere((product) => product.id == itemId.toString());
-        isRemoving = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Item removed from cart')),
-      );
+      if (widget.token != null) {
+        await ProductService.removeFromCart(int.parse(item.id), widget.token!); // Pass the token
+        setState(() {
+          cartItems.removeWhere((p) => p.id == item.id);
+          calculateTotal();
+        });
+      }
     } catch (e) {
-      setState(() => isRemoving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to remove item: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove item")));
     }
   }
 
@@ -98,41 +94,83 @@ class _BagScreenState extends State<BagScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : cartItems.isEmpty
-              ? const Center(child: Text("Your bag is empty!"))
-              : ListView.builder(
-                  itemCount: cartItems.length,
-                  itemBuilder: (context, index) {
-                    final product = cartItems[index];
-                    return ListTile(
-                      contentPadding: const EdgeInsets.all(10),
-                      leading: Image.network(
-                        product.imageUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.grey,
-                            child: const Icon(Icons.error),
+              ? const Center(child: Text("Your bag is empty"))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: cartItems.length,
+                        itemBuilder: (context, index) {
+                          final item = cartItems[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                            elevation: 4,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(10),
+                              leading: Image.network(
+                                item.imageUrl,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                              title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("₹${item.discountedPrice.toStringAsFixed(2)}", style: TextStyle(fontSize: 16)),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove),
+                                        onPressed: () => updateQuantity(item, -1),
+                                      ),
+                                      Text('${item.quantity ?? 1}', style: TextStyle(fontSize: 16)),
+                                      IconButton(
+                                        icon: const Icon(Icons.add),
+                                        onPressed: () => updateQuantity(item, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => removeItem(item),
+                              ),
+                            ),
                           );
                         },
                       ),
-                      title: Text(product.name),
-                      subtitle: Text("₹${product.discountedPrice}"),
-                      trailing: isRemoving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () => _removeFromCart(product.id),
-                            ),
-                    );
-                  },
+                    ),
+                    Divider(thickness: 2),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Total:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text("₹${cartTotal.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/checkout');
+                        },
+                        child: const Text("Proceed to Checkout"),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
     );
   }
