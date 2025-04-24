@@ -28,12 +28,10 @@ class _BagScreenState extends State<BagScreen> {
     setState(() => isLoading = true);
 
     try {
-      // Add product if passed
       if (widget.productToAdd != null && widget.token != null) {
         await ProductService.addToCart(widget.productToAdd!.id, 1, widget.token!);
       }
 
-      // Get cart items using token
       if (widget.token != null) {
         final items = await ProductService.getCartItems();
         setState(() {
@@ -62,7 +60,7 @@ class _BagScreenState extends State<BagScreen> {
 
     try {
       if (widget.token != null) {
-        await ProductService.addToCart(item.id, delta, widget.token!); // Pass the token
+        await ProductService.addToCart(item.id, delta, widget.token!);
         setState(() {
           item.quantity = newQty;
           calculateTotal();
@@ -73,19 +71,22 @@ class _BagScreenState extends State<BagScreen> {
     }
   }
 
-  void removeItem(Product item) async {
-    try {
-      if (widget.token != null) {
-        await ProductService.removeFromCart(int.parse(item.id), widget.token!); // Pass the token
-        setState(() {
-          cartItems.removeWhere((p) => p.id == item.id);
-          calculateTotal();
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove item")));
+void removeItem(Product item) async {
+  try {
+    if (item.cartItemId != null) {
+      await ProductService.removeFromCart(item.cartItemId!); // 👈 Use cartItemId only
+      setState(() {
+        cartItems.removeWhere((p) => p.cartItemId == item.cartItemId);
+        calculateTotal();
+      });
+    } else {
+      throw Exception("Missing cartItemId");
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove item")));
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,30 +104,36 @@ class _BagScreenState extends State<BagScreen> {
                         itemBuilder: (context, index) {
                           final item = cartItems[index];
                           return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            elevation: 2,
                             child: ListTile(
-                              contentPadding: const EdgeInsets.all(10),
-                              leading: Image.network(
-                                item.imageUrl,
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
+                              contentPadding: const EdgeInsets.all(8),
+                              leading: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    item.imageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                               title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("₹${item.discountedPrice.toStringAsFixed(2)}", style: TextStyle(fontSize: 16)),
+                                  const SizedBox(height: 4),
+                                  Text("₹${item.discountedPrice}"),
                                   Row(
                                     children: [
                                       IconButton(
-                                        icon: const Icon(Icons.remove),
+                                        icon: const Icon(Icons.remove_circle_outline),
                                         onPressed: () => updateQuantity(item, -1),
                                       ),
-                                      Text('${item.quantity ?? 1}', style: TextStyle(fontSize: 16)),
+                                      Text('${item.quantity ?? 1}'),
                                       IconButton(
-                                        icon: const Icon(Icons.add),
+                                        icon: const Icon(Icons.add_circle_outline),
                                         onPressed: () => updateQuantity(item, 1),
                                       ),
                                     ],
@@ -142,32 +149,24 @@ class _BagScreenState extends State<BagScreen> {
                         },
                       ),
                     ),
-                    Divider(thickness: 2),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Total:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text("₹${cartTotal.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
+                          const Text("Total:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text("₹${cartTotal.toStringAsFixed(2)}", style: const TextStyle(fontSize: 18)),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/checkout');
-                        },
-                        child: const Text("Proceed to Checkout"),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/checkout');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       ),
+                      child: const Text("Checkout"),
                     ),
                     const SizedBox(height: 20),
                   ],

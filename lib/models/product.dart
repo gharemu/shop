@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class Product with ChangeNotifier {
   final String id;
   int quantity; // ✅ Made mutable
+    final int? cartItemId; // 👈 Add this line
+
   final String name;
   final String brand;
   final String description;
@@ -25,6 +27,8 @@ class Product with ChangeNotifier {
   Product({
     required this.id,
     required this.quantity, // ✅ Initialize here
+      this.cartItemId, // 👈 Add this
+
     required this.name,
     required this.brand,
     required this.description,
@@ -77,6 +81,7 @@ class Product with ChangeNotifier {
   return Product(
     id: json['id'].toString(),
     quantity: _toInt(json['quantity'] ?? 1), // Default to 1 if quantity is null
+   cartItemId: json['cart_item_id'], // 👈 This must match your backend response key
     name: json['name'] ?? '',
     brand: json['brand'] ?? 'Unknown',
     description: json['description'] ?? '',

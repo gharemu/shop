@@ -288,22 +288,25 @@ static Future<List<Product>> getCartItems() async {
     throw Exception('Error fetching cart items: $e');
   }
 }
+ // Static method to remove item from Cart
+ static Future<void> removeFromCart(int cartItemId) async {
+  final token = await ApiService.getToken(); // Ensure this gets the token
+  if (token == null || token.isEmpty) {
+    throw Exception("No token provided");
+  }
 
+  final url = Uri.parse('http://192.168.10.64:5000/api/cart/cartdel/$cartItemId');
 
-  // Static method to remove item from Cart
-  static Future<void> removeFromCart(int itemId, String token) async {
-    final response = await http.delete(
-      Uri.parse('http://192.168.10.64:5000/api/cart/cartdel/$itemId'),
-      headers: {
-        'Authorization': 'Bearer $token', // Authorization header with JWT token
-      },
-    );
+  final response = await http.delete(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+  );
 
-    if (response.statusCode == 200) {
-      print('Item removed from cart');
-    } else {
-      throw Exception('Failed to remove item from cart');
-    }
+  if (response.statusCode != 200) {
+    throw Exception('Failed to remove item');
   }
 }
-
+}
