@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
 import 'package:Deals/services/product_service.dart';
@@ -28,20 +27,25 @@ class _BagScreenState extends State<BagScreen> {
     setState(() => isLoading = true);
 
     try {
+      // 1️⃣  Add to cart if BagScreen was opened with a product
       if (widget.productToAdd != null && widget.token != null) {
-        await ProductService.addToCart(widget.productToAdd!.id, 1, widget.token!);
+        await ProductService.addToCart(
+          widget.productToAdd!.id,
+          1,
+          widget.token!,
+        );
       }
 
+      // 2️⃣  Always refresh cart from server so every item has cartItemId
       if (widget.token != null) {
-        final items = await ProductService.getCartItems();
-        setState(() {
-          cartItems = items;
-        });
+        cartItems = await ProductService.getCartItems();
       }
 
       calculateTotal();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => isLoading = false);
     }
@@ -67,110 +71,153 @@ class _BagScreenState extends State<BagScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update quantity")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to update quantity")));
     }
   }
 
-void removeItem(Product item) async {
-  try {
-    if (item.cartItemId != null) {
-      await ProductService.removeFromCart(item.cartItemId!); // 👈 Use cartItemId only
+  void removeItem(Product item) async {
+    // Guard – every cart line coming from server should already have an id
+    if (item.cartItemId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Item has no cartItemId')));
+      return;
+    }
+
+    final id = item.cartItemId!;
+
+    // Optimistic UI: delete locally first, roll back on error
+    final backup = List<Product>.from(cartItems);
+    setState(() {
+      cartItems.removeWhere((p) => p.cartItemId == id);
+      calculateTotal();
+    });
+
+    try {
+      await ProductService.removeFromCart(id);
+      // Success – nothing else to do
+    } catch (e) {
+      // Roll back and inform the user
       setState(() {
-        cartItems.removeWhere((p) => p.cartItemId == item.cartItemId);
+        cartItems = backup;
         calculateTotal();
       });
-    } else {
-      throw Exception("Missing cartItemId");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to remove item: $e')));
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove item")));
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Your Bag")),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : cartItems.isEmpty
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : cartItems.isEmpty
               ? const Center(child: Text("Your bag is empty"))
               : Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            elevation: 2,
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(8),
-                              leading: SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    item.imageUrl,
-                                    fit: BoxFit.cover,
-                                  ),
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: cartItems.length,
+                      itemBuilder: (context, index) {
+                        final item = cartItems[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          elevation: 2,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(8),
+                            leading: SizedBox(
+                              width: 60,
+                              height: 60,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  item.imageUrl,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                              title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text("₹${item.discountedPrice}"),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.remove_circle_outline),
-                                        onPressed: () => updateQuantity(item, -1),
-                                      ),
-                                      Text('${item.quantity ?? 1}'),
-                                      IconButton(
-                                        icon: const Icon(Icons.add_circle_outline),
-                                        onPressed: () => updateQuantity(item, 1),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => removeItem(item),
+                            ),
+                            title: Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Total:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text("₹${cartTotal.toStringAsFixed(2)}", style: const TextStyle(fontSize: 18)),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/checkout');
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text("₹${item.oldPrice}"),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                      ),
+                                      onPressed: () => updateQuantity(item, -1),
+                                    ),
+                                    Text('${item.quantity}'),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.add_circle_outline,
+                                      ),
+                                      onPressed: () => updateQuantity(item, 1),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => removeItem(item),
+                            ),
+                          ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                      ),
-                      child: const Text("Checkout"),
                     ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Total:",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "₹${cartTotal.toStringAsFixed(2)}",
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/checkout');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 50,
+                        vertical: 15,
+                      ),
+                    ),
+                    child: const Text("Checkout"),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
     );
   }
 }
