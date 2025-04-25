@@ -200,47 +200,14 @@ class _Under999ScreenState extends State<Under999Screen>
                         child: Hero(
                           tag: 'product-image-${product.id}',
                           child: Image.network(
-                            product.imageUrl,
+                            product.image!,
                             height: 160,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              product.isFavorite = !product.isFavorite;
-                            });
-                          },
-                          child: ScaleTransition(
-                            scale: CurvedAnimation(
-                              parent: _bannerController,
-                              curve: Curves.easeInOut,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Icon(
-                                product.isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color:
-                                    product.isFavorite
-                                        ? const Color(0xFFFF3E6C)
-                                        : Colors.grey,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -256,7 +223,7 @@ class _Under999ScreenState extends State<Under999Screen>
                             ),
                           ),
                           child: Text(
-                            "₹${product.discountedPrice}",
+                            "₹${product.discount}",
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -273,7 +240,7 @@ class _Under999ScreenState extends State<Under999Screen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product.name,
+                          product.name!,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -283,7 +250,7 @@ class _Under999ScreenState extends State<Under999Screen>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          product.description,
+                          product.description!,
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -295,7 +262,7 @@ class _Under999ScreenState extends State<Under999Screen>
                         Row(
                           children: [
                             Text(
-                              "₹${product.discountedPrice}",
+                              "₹${product.discount}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,

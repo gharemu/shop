@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:Deals/models/product.dart';
+import 'package:Deals/services/wishlist_service.dart';
+import 'package:Deals/login/api_service.dart';
+import 'package:Deals/screen/product_detail_screen.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -8,72 +12,203 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  List<String> wishlist = []; // List to store wishlist items
+  List<Product> wishlistItems = [];
+  bool isLoading = true;
+  String? errorMessage;
 
-  void addToWishlist(String product) {
-    setState(() {
-      wishlist.add(product);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadWishlistItems();
   }
 
-  void removeFromWishlist(int index) {
+  Future<void> _loadWishlistItems() async {
     setState(() {
-      wishlist.removeAt(index);
+      isLoading = true;
+      errorMessage = null;
     });
+
+    try {
+      final token = await ApiService.getToken();
+      if (token == null || token.isEmpty) {
+        setState(() {
+          errorMessage = "Please login to view your wishlist";
+          isLoading = false;
+        });
+        return;
+      }
+
+      final items = await WishlistService.getWishlistItems(token);
+      setState(() {
+        wishlistItems = items;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load wishlist: $e";
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> removeItem(Product item) async {
+    if (item.wishlistItemId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item has no wishlistItemId')),
+        );
+      }
+      return;
+    }
+
+    final id = item.wishlistItemId!;
+
+    final backup = List<Product>.from(wishlistItems);
+    setState(() {
+      wishlistItems.removeWhere((p) => p.wishlistItemId == id);
+    });
+
+    try {
+      await WishlistService.removeWishlist(id);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          wishlistItems = backup;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to remove item: $e')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Wishlist'),
-        backgroundColor: Colors.white,
-        elevation: 2,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      appBar: AppBar(title: const Text('Wishlist')),
       body:
-          wishlist.isEmpty
-              ? const Center(child: Text('No items in wishlist'))
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : errorMessage != null
+              ? Center(child: Text(errorMessage!))
               : ListView.builder(
-                itemCount: wishlist.length,
+                padding: const EdgeInsets.all(16),
+                itemCount: wishlistItems.length,
                 itemBuilder: (context, index) {
+                  final product = wishlistItems[index];
                   return WishlistItem(
-                    productName: wishlist[index],
-                    onDelete: () => removeFromWishlist(index),
+                    product: product,
+                    onRemove: () => removeItem(product),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  ProductDetailScreen(product: product),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          addToWishlist('Product ${wishlist.length + 1}'); // Dummy product
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
 
 class WishlistItem extends StatelessWidget {
-  final String productName;
-  final VoidCallback onDelete;
+  final Product product;
+  final VoidCallback onRemove;
+  final VoidCallback onTap;
 
   const WishlistItem({
     super.key,
-    required this.productName,
-    required this.onDelete,
+    required this.product,
+    required this.onRemove,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      child: ListTile(
-        leading: const Icon(Icons.favorite, color: Colors.red),
-        title: Text(productName),
-        subtitle: const Text('Product Description'),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          onPressed: onDelete,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  product.image ?? '',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.grey[200],
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '₹${product.discountPrice ?? ''}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color(0xFFFF3E6C),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: onRemove,
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('REMOVE'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(color: Colors.grey[300]!),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

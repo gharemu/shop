@@ -1,6 +1,8 @@
 import 'package:Deals/login/api_service.dart';
 import 'package:Deals/screen/bags_screen.dart';
+import 'package:Deals/screen/wishlist_screen.dart';
 import 'package:Deals/services/product_service.dart';
+import 'package:Deals/services/wishlist_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
 
@@ -30,22 +32,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              widget.product.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border,
-              color:
-                  widget.product.isFavorite
-                      ? const Color(0xFFFF3E6C)
-                      : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                widget.product.isFavorite = !widget.product.isFavorite;
-              });
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     widget.product.isFavorite
+          //         ? Icons.favorite
+          //         : Icons.favorite_border,
+          //     color:
+          //         widget.product.isFavorite
+          //             ? const Color(0xFFFF3E6C)
+          //             : Colors.grey,
+          //   ),
+          //   onPressed: () {
+          //     setState(() {
+          //       // widget.product.isFavorite = !widget.product.isFavorite;
+          //     });
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.black),
             onPressed: () {
@@ -63,10 +65,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             _buildSizeSelector(),
             _buildColorSelector(),
             _buildQuantitySelector(),
-            _buildDeliveryInfo(),
-            _buildDescription(),
-            _buildReviews(),
-            _buildSimilarProducts(),
+            //_buildDeliveryInfo(),
+            //_buildDescription(),
+            //_buildReviews(),
+            // _buildSimilarProducts(),
             const SizedBox(height: 80), // Space for bottom buttons
           ],
         ),
@@ -84,7 +86,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           PageView.builder(
             itemCount: 3, // Assuming we have 3 images per product
             itemBuilder: (context, index) {
-              return Image.network(widget.product.imageUrl, fit: BoxFit.cover);
+              return Image.network(widget.product.image!, fit: BoxFit.cover);
             },
           ),
           Positioned(
@@ -120,12 +122,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.product.name,
+            widget.product.name!,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            widget.product.description,
+            widget.product.description!,
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 12),
@@ -140,7 +142,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: Row(
                   children: [
                     Text(
-                      "${widget.product.rating}",
+                      "{widget.product.rating}",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -154,7 +156,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                "${widget.product.reviews} reviews",
+                "{widget.product.reviews} reviews",
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
@@ -164,7 +166,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                "₹${widget.product.discountedPrice}",
+                "₹${widget.product.discountPrice}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -393,395 +395,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildDeliveryInfo() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.grey[50],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "DELIVERY OPTIONS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, size: 20),
-              const SizedBox(width: 8),
-              const Text("Deliver to: ", style: TextStyle(fontSize: 14)),
-              const Text(
-                "110001",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "CHANGE",
-                  style: TextStyle(fontSize: 14, color: Color(0xFFFF3E6C)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.local_shipping_outlined, size: 20),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Get it by Tomorrow, April 3",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "Free delivery for orders above ₹499",
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.refresh_outlined, size: 20),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "7 Days Easy Return",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "Change of mind not applicable",
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDescription() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "PRODUCT DETAILS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            "This stylish ${widget.product.name.toLowerCase()} from ${widget.product.brand} is designed for maximum comfort and style. Perfect for casual outings and daily wear.",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[800],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "MATERIAL & CARE",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "• 100% Cotton\n• Machine Wash",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[800],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "SPECIFICATIONS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Table(
-            columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(2)},
-            children: [
-              TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "Fit",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "Regular",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[800]),
-                    ),
-                  ),
-                ],
-              ),
-              TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "Pattern",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "Solid",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[800]),
-                    ),
-                  ),
-                ],
-              ),
-              TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "Country",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "India",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[800]),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviews() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "RATINGS & REVIEWS",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "VIEW ALL",
-                  style: TextStyle(fontSize: 14, color: Color(0xFFFF3E6C)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.green[700],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "${widget.product.rating}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.star, size: 16, color: Colors.white),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                "${widget.product.reviews} verified reviews",
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildReviewItem(
-            name: "Vishal K.",
-            rating: 4.5,
-            date: "22 Mar, 2025",
-            comment:
-                "Great product! Fits perfectly and looks exactly like the pictures. The fabric quality is excellent for the price point.",
-          ),
-          const Divider(),
-          _buildReviewItem(
-            name: "Priya S.",
-            rating: 5.0,
-            date: "15 Mar, 2025",
-            comment:
-                "Absolutely loved it! The color is vibrant and material is soft. Will definitely buy more from this brand.",
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewItem({
-    required String name,
-    required double rating,
-    required String date,
-    required String comment,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "$rating",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Icon(Icons.star, size: 12, color: Colors.green[700]),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                date,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            comment,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[800],
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimilarProducts() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            "SIMILAR PRODUCTS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            scrollDirection: Axis.horizontal,
-            itemCount: 5, // Assuming we have 5 similar products
-            itemBuilder: (context, index) {
-              return Container(
-                width: 150,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        widget.product.imageUrl,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.product.brand,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "Similar ${widget.product.name}",
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "₹${widget.product.discountedPrice - 100 + (index * 50)}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBottomButtons() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -810,9 +423,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              onPressed: () {
-                // Add to wishlist
-              },
+              onPressed: addToWishlist, // Use the method here
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -829,45 +440,51 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-       onPressed: () async {
-  try {
-    final userToken = await ApiService.getToken();
-    if (userToken == null || userToken.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User not logged in!")),
-      );
-      return; // Exit if no valid token is found
-    }
+              onPressed: () async {
+                try {
+                  final userToken = await ApiService.getToken();
+                  if (userToken == null || userToken.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("User not logged in!")),
+                    );
+                    return; // Exit if no valid token is found
+                  }
 
-    final productId = (widget.product.id);
-    if (productId == null) throw Exception("Invalid product ID");
+                  final productId = widget.product.id;
+                  if (productId == null) throw Exception("Invalid product ID");
 
-    // Add product to cart
-    await ProductService.addToCart(productId, 1, userToken); // quantity = 1 for now
+                  // Add product to cart - Convert productId to string to match the API expectation
+                  await ProductService.addToCart(
+                    productId
+                        .toString(), // Convert to string regardless of the original type
+                    1, // quantity = 1 for now
+                    userToken,
+                  );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Added to cart!")),
-    );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Added to cart!")),
+                  );
 
-    // Navigate to BagScreen after adding
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BagScreen(
-          token: userToken, // Pass the token to the BagScreen
-          productToAdd: widget.product,
-        ),
-      ),
-    );
-  } catch (e) {
-    print(e); // Print the error in the console for debugging
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Failed to add to cart: $e")), // Show error in UI
-    );
-  }
-},
-
-
+                  // Navigate to BagScreen after adding
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => BagScreen(
+                            token: userToken, // Pass the token to the BagScreen
+                            productToAdd: widget.product,
+                          ),
+                    ),
+                  );
+                } catch (e) {
+                  print(e); // Print the error in the console for debugging
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Failed to add to cart: $e"),
+                    ), // Show error in UI
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 backgroundColor: Colors.black,
@@ -895,5 +512,52 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ],
       ),
     );
+  }
+
+  // Fixed addToWishlist method
+  Future<void> addToWishlist() async {
+    try {
+      final userToken = await ApiService.getToken();
+      if (userToken == null || userToken.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("User not logged in!")));
+        return;
+      }
+
+      final productId = widget.product.id;
+      if (productId == null) throw Exception("Invalid product ID");
+
+      // Ensure product ID is handled as an integer
+      final intProductId =
+          productId is int ? productId : int.tryParse(productId.toString());
+      if (intProductId == null) throw Exception("Invalid product ID format");
+
+      final success = await WishlistService.addToWishlist(
+        intProductId,
+        userToken,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => WishlistScreen()),
+      );
+
+      if (success) {
+        setState(() {
+          // widget.product.isFavorite = true; // Update the UI to show it's favorited
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Added to wishlist!")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to add to wishlist")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
 }

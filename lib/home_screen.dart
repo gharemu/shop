@@ -18,9 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const CategoriesScreen(), // Main category screen
-    const Under999Screen(),     // Under 999 screen
-    CategoryPage(),             // Luxury section
-    const BagScreen(token: 'id',),         // Bags section
+    const Under999Screen(), // Under 999 screen
+    CategoryPage(), // Luxury section
+    const BagScreen(token: 'id'), // Bags section
   ];
 
   void _onItemTapped(int index) {
@@ -37,10 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
         transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
         child: Container(
           // Key is necessary so AnimatedSwitcher knows when a new widget is shown.

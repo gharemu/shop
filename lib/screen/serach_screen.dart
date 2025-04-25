@@ -148,11 +148,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           final product = _searchResults[index];
                           return ListTile(
                             leading:
-                                product.imageUrl.isNotEmpty
+                                product.image!.isNotEmpty
                                     ? ClipRRect(
                                       borderRadius: BorderRadius.circular(4),
                                       child: Image.network(
-                                        product.imageUrl,
+                                        product.image!,
                                         width: 60,
                                         height: 60,
                                         fit: BoxFit.cover,
@@ -178,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                       ),
                                     ),
                             title: Text(
-                              product.name,
+                              product.name!,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -187,13 +187,13 @@ class _SearchScreenState extends State<SearchScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  product.description,
+                                  product.description!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '₹${product.discountedPrice.toStringAsFixed(2)}',
+                                  '₹${product.discountPrice}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -216,7 +216,6 @@ class _SearchScreenState extends State<SearchScreen> {
                                   transitionsBuilder: (
                                     context,
 
-                                    
                                     animation,
                                     secondaryAnimation,
                                     child,
