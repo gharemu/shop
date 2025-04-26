@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:Deals/models/product.dart';
 import 'package:Deals/login/api_service.dart';
 
-class WishlistService {
+class CartService {
   // Update to match your product_service.dart IP address
   static const String baseUrl = 'http://192.168.10.64:5000/api';
 
@@ -100,6 +100,24 @@ class WishlistService {
       throw Exception(
         'Failed to remove item • ${res.statusCode} • ${res.body}',
       );
+    }
+  }
+
+  static Future<bool> isProductInCart(String productId, String token) async {
+    try {
+      // Get all cart items
+      final cartItems = await getCartItems(token);
+
+      // Check if product exists in cart
+      for (var item in cartItems) {
+        if (item.id.toString() == productId) {
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      print('Error checking if product is in cart: $e');
+      return false;
     }
   }
 }
