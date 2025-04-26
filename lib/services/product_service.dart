@@ -19,7 +19,7 @@ class ProductService {
       // Filter only 'Women' category products
       List<Product> womenProducts =
           allProducts
-              .where((product) => product.category.toLowerCase() == 'men')
+              .where((product) => product.category!.toLowerCase() == 'men')
               .toList();
 
       return womenProducts;
@@ -40,7 +40,7 @@ class ProductService {
       // Filter only 'Women' category products
       List<Product> womenProducts =
           allProducts
-              .where((product) => product.category.toLowerCase() == 'women')
+              .where((product) => product.category!.toLowerCase() == 'women')
               .toList();
 
       return womenProducts;
@@ -61,7 +61,7 @@ class ProductService {
       // Filter only 'Women' category products
       List<Product> womenProducts =
           allProducts
-              .where((product) => product.category.toLowerCase() == 'kids')
+              .where((product) => product.category!.toLowerCase() == 'kids')
               .toList();
 
       return womenProducts;
@@ -82,7 +82,9 @@ class ProductService {
       // Filter products with discountedPrice less than or equal to ₹999
       List<Product> under999Products =
           allProducts
-              .where((product) => product.discountedPrice <= 999)
+              .where(
+                (product) => int.parse(product.discountPrice.toString()) <= 999,
+              )
               .toList();
 
       return under999Products;
@@ -198,61 +200,113 @@ class ProductService {
         Uri.parse('http://192.168.10.64:5000/api/cart/cartadd'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer $token', // Authorization header with JWT token
+          'Authorization': 'Bearer $token',
         },
-        body: json.encode({'product_id': productId, 'quantity': quantity}),
+        body: json.encode({
+          'product_id': int.parse(productId), // Convert String to int
+          'quantity': quantity,
+        }),
       );
 
       if (response.statusCode == 200) {
         print('Item added to cart');
       } else {
-        // Log the response body to help debug the error
         print('Failed to add item to cart. Response: ${response.body}');
         throw Exception('Failed to add item to cart');
       }
     } catch (e) {
-      // Log any other errors
       print('Error while adding to cart: $e');
       print("Using token: $token");
-
       throw Exception('Failed to add item to cart: $e');
     }
   }
 
   // Static method to get Cart Items
-  static Future<List<Product>> getCartItems() async {
-    final token = await ApiService.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('No token – user not logged in');
+  static Future<List<Product>> getCartItems(String token) async {
+    final Uri url = Uri.parse("http://192.168.10.64:5000/api/cart/cartget");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data
+            .map(
+              (item) => Product(
+                cartItemId: item['cart_item_id'],
+                id: item['product_id'],
+                name: item['product_name'],
+                discountPrice: item['product_price'].toString(),
+                image: item['product_image'],
+                quantity: item['quantity'],
+                // Make sure cartItemId is defined in your Product class
+                // If not defined, you'll need to add it to the Product class
+              ),
+            )
+            .toList();
+      } else {
+        throw Exception('Failed to load cart items: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching cart items: $e');
     }
-
-    final res = await http.get(
-      Uri.parse('http://192.168.10.64:5000/api/cart/cartget'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    if (res.statusCode != 200) {
-      throw Exception('Failed to load cart items • ${res.statusCode}');
-    }
-
-    final List<dynamic> raw = json.decode(res.body);
-
-    return raw.map<Product>((item) {
-      return Product.fromJson({
-        // forward raw keys exactly; Product.fromJson handles mapping
-        ...item,
-        'id': item['product_id'],
-        'name': item['product_name'],
-        'oldPrice': item['product_price'],
-        'discountedPrice': item['product_price'],
-        'imageUrl': item['product_image'],
-      });
-    }).toList();
   }
 
-  // Static method to remove item from Cart
-  /// DELETE /api/cart/cartdel/{cartItemId}
+  // Renamed to avoid duplicate definition
+  static Future<bool> addToCartItem(
+    String productId,
+    int quantity,
+    String token,
+  ) async {
+    final Uri url = Uri.parse("http://192.168.10.64:5000/api/cart/cartadd");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "product_id": int.parse(productId), // Convert String to int
+          "quantity": quantity,
+        }),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error adding to cart: $e');
+    }
+  }
+
+  // Renamed to avoid duplicate definition
+  static Future<bool> removeCartItem(int cartItemId, String token) async {
+    final Uri url = Uri.parse(
+      "http://192.168.10.64:5000/api/cart/cartdel/$cartItemId",
+    );
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error removing from cart: $e');
+    }
+  }
+
+  // Original removeFromCart method
   static Future<void> removeFromCart(int cartItemId) async {
     final token = await ApiService.getToken();
     if (token == null || token.isEmpty) {

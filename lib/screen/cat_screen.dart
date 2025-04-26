@@ -313,13 +313,13 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         topRight: Radius.circular(12),
                       ),
                       child: Image.network(
-                        product.imageUrl,
+                        product.image!,
                         height: 180 * heightFactor,
                         width: double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    Positioned(
+                    /*Positioned(
                       top: 8,
                       right: 8,
                       child: GestureDetector(
@@ -367,8 +367,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   : Colors.grey[600],
                         ),
                       ),
-                    ),
-                    if (product.discount > 0)
+                    ),*/
+                    if (product.discount! > 0)
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -393,29 +393,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           ),
                         ),
                       ),
-                    if (product.isNew)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green[600],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            "NEW",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
                 Padding(
@@ -424,7 +401,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.name,
+                        product.name!,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -432,7 +409,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        product.description,
+                        product.description!,
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -441,14 +418,14 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       Row(
                         children: [
                           Text(
-                            "₹${product.discountedPrice}",
+                            "₹${product.discountPrice}",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(width: 4),
-                          if (product.discount > 0)
+                          if (product.discount! > 0)
                             Text(
                               "₹${product.oldPrice}",
                               style: TextStyle(
