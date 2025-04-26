@@ -4,11 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String authUrl = "http://192.168.10.64:5000/api/auth";
-  static const String userUrl = "http://192.168.10.64:5000/api/user";
+  static const String authUrl = "http://192.168.10.62:5000/api/auth";
+  static const String userUrl = "http://192.168.10.62:5000/api/user";
   static const String TOKEN_KEY = "user_token";
   static const String USER_DATA_KEY = "user_data";
-  
+
   // Utility to safely decode JSON
   static dynamic safeJsonDecode(String body) {
     try {
@@ -20,7 +20,10 @@ class ApiService {
 
   // REGISTER USER
   static Future<Map<String, dynamic>> registerUser(
-      String name, String email, String password) async {
+    String name,
+    String email,
+    String password,
+  ) async {
     final Uri url = Uri.parse("$authUrl/register");
     try {
       final response = await http.post(
@@ -35,7 +38,7 @@ class ApiService {
         final decoded = safeJsonDecode(response.body);
         return {
           "success": false,
-          "message": decoded?["error"] ?? "Registration failed"
+          "message": decoded?["error"] ?? "Registration failed",
         };
       }
     } catch (e) {
@@ -45,7 +48,9 @@ class ApiService {
 
   // LOGIN USER
   static Future<Map<String, dynamic>> loginUser(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     final Uri url = Uri.parse("$authUrl/login");
     try {
       final response = await http.post(
@@ -56,11 +61,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = safeJsonDecode(response.body);
-        
+
         // Save token and user data to shared preferences
         await saveToken(data["token"]);
         await saveUserData(data["user"]);
-        
+
         return {
           "success": true,
           "message": "Login successful",
@@ -71,7 +76,7 @@ class ApiService {
         final decoded = safeJsonDecode(response.body);
         return {
           "success": false,
-          "message": decoded?["error"] ?? "Login failed"
+          "message": decoded?["error"] ?? "Login failed",
         };
       }
     } catch (e) {
@@ -98,7 +103,7 @@ class ApiService {
         final decoded = safeJsonDecode(response.body);
         return {
           "success": false,
-          "message": decoded?["error"] ?? "Failed to fetch profile"
+          "message": decoded?["error"] ?? "Failed to fetch profile",
         };
       }
     } catch (e) {
@@ -108,7 +113,9 @@ class ApiService {
 
   // UPDATE PROFILE (based on Angular service)
   static Future<Map<String, dynamic>> updateProfile(
-      Map<String, dynamic> updatedData, String token) async {
+    Map<String, dynamic> updatedData,
+    String token,
+  ) async {
     final Uri url = Uri.parse("$userUrl/profile/update");
     try {
       final response = await http.put(
@@ -128,7 +135,7 @@ class ApiService {
         print("Update Status Code: ${response.statusCode}");
         return {
           "success": false,
-          "message": decoded?["error"] ?? "Update failed"
+          "message": decoded?["error"] ?? "Update failed",
         };
       }
     } catch (e) {

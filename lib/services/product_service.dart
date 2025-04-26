@@ -5,7 +5,7 @@ import 'package:Deals/models/product.dart';
 
 class ProductService {
   final String baseUrl =
-      "http://192.168.10.64:5000/api"; // Replace with your actual backend API URL
+      "http://192.168.10.62:5000/api"; // Replace with your actual backend API URL
 
   // Fetch Men products
   Future<List<Product>> getMenProducts() async {
@@ -197,7 +197,7 @@ class ProductService {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.10.64:5000/api/cart/cartadd'),
+        Uri.parse('http://192.168.10.62:5000/api/cart/cartadd'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -223,7 +223,7 @@ class ProductService {
 
   // Static method to get Cart Items
   static Future<List<Product>> getCartItems(String token) async {
-    final Uri url = Uri.parse("http://192.168.10.64:5000/api/cart/cartget");
+    final Uri url = Uri.parse("http://192.168.10.62:5000/api/cart/cartget");
 
     try {
       final response = await http.get(
@@ -264,7 +264,7 @@ class ProductService {
     int quantity,
     String token,
   ) async {
-    final Uri url = Uri.parse("http://192.168.10.64:5000/api/cart/cartadd");
+    final Uri url = Uri.parse("http://192.168.10.62:5000/api/cart/cartadd");
 
     try {
       final response = await http.post(
@@ -288,7 +288,7 @@ class ProductService {
   // Renamed to avoid duplicate definition
   static Future<bool> removeCartItem(int cartItemId, String token) async {
     final Uri url = Uri.parse(
-      "http://192.168.10.64:5000/api/cart/cartdel/$cartItemId",
+      "http://192.168.10.62:5000/api/cart/cartdel/$cartItemId",
     );
 
     try {
@@ -314,7 +314,7 @@ class ProductService {
     }
 
     final uri = Uri.parse(
-      'http://192.168.10.64:5000/api/cart/cartdel/$cartItemId',
+      'http://192.168.10.62:5000/api/cart/cartdel/$cartItemId',
     );
 
     final res = await http.delete(
@@ -327,6 +327,29 @@ class ProductService {
       throw Exception(
         'Failed to remove item • ${res.statusCode} • ${res.body}',
       );
+    }
+  }
+
+  Future<List<Product>> getFilteredProducts(
+    String category,
+    String parentCategory,
+    String subCategory,
+  ) async {
+    try {
+      // You could implement a specific API endpoint for filtering
+      // For now, we'll fetch all products and filter client-side
+      final allProducts = await getAllProducts();
+
+      return allProducts
+          .where(
+            (product) =>
+                product.category == category &&
+                product.parentCategory == parentCategory &&
+                product.subCategory == subCategory,
+          )
+          .toList();
+    } catch (e) {
+      throw Exception('Error filtering products: $e');
     }
   }
 }
