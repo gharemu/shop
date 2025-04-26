@@ -5,7 +5,7 @@ import 'package:Deals/login/api_service.dart';
 
 class WishlistService {
   // Update to match your product_service.dart IP address
-  static const String baseUrl = 'http://192.168.10.62:5000/api';
+  static const String baseUrl = 'http://192.168.10.64:5000/api';
 
   // Add a product to wishlist
   static Future<bool> addToCart(int productId, String token) async {
