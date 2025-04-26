@@ -1,5 +1,6 @@
 import 'package:Deals/login/api_service.dart';
 import 'package:Deals/screen/bags_screen.dart';
+import 'package:Deals/screen/checkout_page.dart'; // Assume you have a checkout screen
 import 'package:Deals/screen/buyNow/buyNow_checkout.dart';
 import 'package:Deals/screen/checkout_page.dart';
 //import 'package:Deals/screen/checkout_screen.dart'; // Assume you have a checkout screen
@@ -805,16 +806,10 @@ Expanded(
       }
 
       // Navigate directly to checkout screen (You'll need to create this screen)
-      /*Navigator.push(
+      Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(
-            token: userToken,
-            products: [widget.product],
-            quantities: {widget.product.id.toString(): _quantity},
-          ),
-        ),
-      );*/
+        MaterialPageRoute(builder: (context) => CheckoutPage()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
