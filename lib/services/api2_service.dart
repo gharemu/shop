@@ -2,63 +2,88 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:Deals/models/product.dart';
 
-class ApiService {
-  final String baseUrl =
-      'https://192.168.10.64:5000/api'; // Replace with your actual API URL
+class CategoryData {
+  final List<String> mainCategories;
+  final Map<String, List<String>> parentCategories;
+  final Map<String, List<String>> subCategories;
 
-  // Fetch all categories
-  Future<List<Map<String, dynamic>>> fetchCategories() async {
+  CategoryData({
+    required this.mainCategories,
+    required this.parentCategories,
+    required this.subCategories,
+  });
+}
+
+class CategoryService {
+  // You can use your API base URL here
+  final String baseUrl = 'http://192.168.10.62:5000/api';
+
+  Future<CategoryData> fetchCategories() async {
     final response = await http.get(Uri.parse('$baseUrl/products'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return List<Map<String, dynamic>>.from(data);
+      final List<dynamic> products = json.decode(response.body);
+
+      // Extract unique categories
+      Set<String> mainCategoriesSet = {};
+      Map<String, Set<String>> parentCategoriesMap = {};
+      Map<String, Set<String>> subCategoriesMap = {};
+
+      for (var product in products) {
+        final productObj = Product.fromJson(product);
+
+        // Add main category (Men, Women, Kids)
+        if (productObj.category != null && productObj.category!.isNotEmpty) {
+          mainCategoriesSet.add(productObj.category!);
+
+          // Initialize parent category set for this main category if it doesn't exist
+          if (!parentCategoriesMap.containsKey(productObj.category)) {
+            parentCategoriesMap[productObj.category!] = {};
+          }
+
+          // Add parent category
+          if (productObj.parentCategory != null &&
+              productObj.parentCategory!.isNotEmpty) {
+            parentCategoriesMap[productObj.category!]!.add(
+              productObj.parentCategory!,
+            );
+
+            // Create a unique key for parent category within main category
+            String parentKey =
+                "${productObj.category!}-${productObj.parentCategory!}";
+
+            // Initialize subcategory set for this parent category if it doesn't exist
+            if (!subCategoriesMap.containsKey(parentKey)) {
+              subCategoriesMap[parentKey] = {};
+            }
+
+            // Add subcategory
+            if (productObj.subCategory != null &&
+                productObj.subCategory!.isNotEmpty) {
+              subCategoriesMap[parentKey]!.add(productObj.subCategory!);
+            }
+          }
+        }
+      }
+
+      // Convert sets to lists
+      Map<String, List<String>> parentCategoriesResult = {};
+      parentCategoriesMap.forEach((key, value) {
+        parentCategoriesResult[key] = value.toList();
+      });
+
+      Map<String, List<String>> subCategoriesResult = {};
+      subCategoriesMap.forEach((key, value) {
+        subCategoriesResult[key] = value.toList();
+      });
+
+      return CategoryData(
+        mainCategories: mainCategoriesSet.toList(),
+        parentCategories: parentCategoriesResult,
+        subCategories: subCategoriesResult,
+      );
     } else {
       throw Exception('Failed to load categories');
-    }
-  }
-
-  // Fetch subcategories for a specific category
-  Future<List<String>> fetchSubcategories(int categoryId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/categories/$categoryId/subcategories'),
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return List<String>.from(data.map((item) => item['name']));
-    } else {
-      throw Exception('Failed to load subcategories');
-    }
-  }
-
-  // Fetch subcategory details
-  Future<List<String>> fetchSubcategoryDetails(String subcategory) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/subcategories'),
-      headers: {'subcategory': subcategory},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return List<String>.from(data.map((item) => item['name']));
-    } else {
-      throw Exception('Failed to load subcategory details');
-    }
-  }
-
-  // Fetch products by subcategory
-  Future<List<Product>> fetchProductsBySubcategory(String subcategory) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/products'),
-      headers: {'subCategory': subcategory},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return data.map<Product>((item) => Product.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load products');
     }
   }
 }
