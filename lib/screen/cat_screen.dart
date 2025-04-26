@@ -12,8 +12,7 @@ class CategoriesScreen extends StatefulWidget {
   _CategoriesScreenState createState() => _CategoriesScreenState();
 }
 
-class _CategoriesScreenState extends State<CategoriesScreen>
-    with SingleTickerProviderStateMixin {
+class _CategoriesScreenState extends State with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ProductService _productService = ProductService();
   bool _isLoading = true;
@@ -145,8 +144,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
-  Widget _buildProductGrid(Future<List<Product>> futureProducts) {
-    return FutureBuilder<List<Product>>(
+  Widget _buildProductGrid(Future futureProducts) {
+    return FutureBuilder(
       future: futureProducts,
       builder: (context, snapshot) {
         if (_isLoading || snapshot.connectionState == ConnectionState.waiting) {
