@@ -1,6 +1,6 @@
 import 'package:Deals/login/api_service.dart';
 import 'package:Deals/screen/bags_screen.dart';
-//import 'package:Deals/screen/checkout_screen.dart'; // Assume you have a checkout screen
+import 'package:Deals/screen/checkout_page.dart'; // Assume you have a checkout screen
 import 'package:Deals/screen/wishlist_screen.dart';
 import 'package:Deals/services/cart_service.dart';
 import 'package:Deals/services/product_service.dart';
@@ -784,16 +784,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       }
 
       // Navigate directly to checkout screen (You'll need to create this screen)
-      /*Navigator.push(
+      Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(
-            token: userToken,
-            products: [widget.product],
-            quantities: {widget.product.id.toString(): _quantity},
-          ),
-        ),
-      );*/
+        MaterialPageRoute(builder: (context) => CheckoutPage()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
