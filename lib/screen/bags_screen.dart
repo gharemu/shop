@@ -1,3 +1,4 @@
+import 'package:Deals/screen/checkout_page.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/models/product.dart';
 import 'package:Deals/services/product_service.dart';
@@ -196,7 +197,7 @@ class _BagScreenState extends State<BagScreen> {
 
   String formatCurrency(double amount) {
     return '₹${amount.toStringAsFixed(2)}';
-  }
+  }   
 
   @override
   Widget build(BuildContext context) {
@@ -442,12 +443,15 @@ class _BagScreenState extends State<BagScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      cartItems.isEmpty
-                          ? null
-                          : () {
-                            Navigator.pushNamed(context, '/checkout');
-                          },
+                 onPressed: cartItems.isEmpty
+    ? null
+    : () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CheckoutPage()),
+        );
+      },
+
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: primaryPink,
