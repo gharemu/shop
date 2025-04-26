@@ -6,8 +6,9 @@ import 'package:Deals/login/api_service.dart';
 class BagScreen extends StatefulWidget {
   final String? token;
   final Product? productToAdd;
+  final bool? buynow;
 
-  const BagScreen({super.key, this.token, this.productToAdd});
+  const BagScreen({super.key, this.token, this.productToAdd, this.buynow});
 
   @override
   State<BagScreen> createState() => _BagScreenState();

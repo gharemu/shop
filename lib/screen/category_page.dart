@@ -115,14 +115,6 @@ class _CategoryPageState extends State<CategoryPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Categories",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: primaryColor,
-        elevation: 0,
-      ),
       body:
           isLoading
               ? Center(child: CircularProgressIndicator(color: primaryColor))

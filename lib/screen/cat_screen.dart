@@ -111,7 +111,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   ),
                   Tab(
                     icon: Image(
-                      image: AssetImage('assets/images/kurta3.jpg'),
+                      image: AssetImage('assets/images/top2.jpg'),
                       width: 24,
                       height: 50,
                     ),
