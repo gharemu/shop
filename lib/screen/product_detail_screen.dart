@@ -1,5 +1,7 @@
 import 'package:Deals/login/api_service.dart';
 import 'package:Deals/screen/bags_screen.dart';
+import 'package:Deals/screen/buyNow/buyNow_checkout.dart';
+import 'package:Deals/screen/checkout_page.dart';
 //import 'package:Deals/screen/checkout_screen.dart'; // Assume you have a checkout screen
 import 'package:Deals/screen/wishlist_screen.dart';
 import 'package:Deals/services/cart_service.dart';
@@ -593,25 +595,44 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Row(
         children: [
           // BUY NOW button
-          Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFFFF3E6C),
-                side: const BorderSide(color: Color(0xFFFF3E6C)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              onPressed: () => handleBuyNow(),
-              child: const Text(
-                "BUY NOW",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+        // Replace the 'BUY NOW' button in the _buildBottomButtons() method with this:
+
+Expanded(
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFFFF3E6C),
+      side: const BorderSide(color: Color(0xFFFF3E6C)),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 0,
+    ),
+    onPressed: () {
+      if (widget.product.id != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BuyNowCheckoutPage(
+              productId: widget.product.id.toString(),
+              quantity: _quantity,
             ),
           ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid product!")),
+        );
+      }
+    },
+    child: const Text(
+      "BUY NOW",
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    ),
+  ),
+),
+
           const SizedBox(width: 12),
           // ADD TO BAG or GO TO BAG button
           Expanded(

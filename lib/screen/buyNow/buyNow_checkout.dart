@@ -1,24 +1,26 @@
-import 'package:Deals/login/profile_account.dart';
-import 'package:Deals/screen/cashondel.dart';
-import 'package:Deals/screen/onlinepayment.dart';
+import 'package:Deals/screen/buyNow/onlinepay_buynow.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/services/checkoutservice.dart';
+import 'buynow_cashondel.dart';
+class BuyNowCheckoutPage extends StatefulWidget {
+  final String productId;
+  final int quantity;
 
-class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({Key? key}) : super(key: key);
+  const BuyNowCheckoutPage({Key? key, required this.productId, required this.quantity}) : super(key: key);
 
   @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
+  State<BuyNowCheckoutPage> createState() => _BuyNowCheckoutPageState();
 }
 
-class _CheckoutPageState extends State<CheckoutPage> {
+class _BuyNowCheckoutPageState extends State<BuyNowCheckoutPage> {
   String name = '';
   String address = '';
   String phoneNumber = '';
   String paymentMethod = 'cash-on-delivery';
-  final CheckoutService _checkoutService = CheckoutService();
   bool isLoading = true;
   String error = '';
+
+  final CheckoutService _checkoutService = CheckoutService();
 
   @override
   void initState() {
@@ -47,18 +49,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
     if (paymentMethod == 'cash-on-delivery') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const CashOnDeliveryPage()),
+        MaterialPageRoute(
+          builder: (context) => BuyNowCashOnDeliveryPage(
+            productId: widget.productId,
+            quantity: widget.quantity,
+          ),
+        ),
       );
-    } else if (paymentMethod == 'online') {
+    } else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const OnlinePaymentPage()),
+        MaterialPageRoute(
+          builder: (context) => BuyNowOnlinePaymentPage(
+            productId: widget.productId,
+            quantity: widget.quantity,
+          ),
+        ),
       );
     }
-  }
-
-  void gotoProfile() {
-    Navigator.pushNamed(context, '/userProfile');
   }
 
   @override
@@ -73,9 +81,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
         body: Center(child: Text(error)),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Checkout'),
+        title: const Text('Buy Now - Checkout'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,22 +98,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(name, style: const TextStyle(fontSize: 18)),
-                       TextButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ProfilePage()),
-    );
-  },
-  child: const Text('EDIT', style: TextStyle(color: Colors.blue)),
-),
-
-                      ],
-                    ),
+                    Text(name, style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 8),
                     Text(address),
                     const SizedBox(height: 8),
