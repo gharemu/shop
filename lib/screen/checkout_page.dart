@@ -8,12 +8,16 @@ class CheckoutPage extends StatefulWidget {
   final List<dynamic>? products;
   final Map<String, int>? quantities;
   final bool comingFromProfile;
+  final bool isSingleProductPurchase; // Added to track if coming from Buy Now
+  final dynamic singleProduct; // Added to store single product data
 
   const CheckoutPage({
     Key? key,
     this.products,
     this.quantities,
     this.comingFromProfile = false,
+    this.isSingleProductPurchase = false, // Default is false (from cart)
+    this.singleProduct, // For Buy Now flow
   }) : super(key: key);
 
   @override
@@ -31,6 +35,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   double subtotal = 0.0;
   double deliveryCharge = 40.0;
   double totalAmount = 0.0;
+  List<dynamic> checkoutProducts = []; // Store products for checkout
 
   @override
   void initState() {
@@ -69,11 +74,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
           phoneNumber = data['phone_number']?.toString() ?? '';
         }
 
-        // Calculate order total if products are passed
-        if (widget.products != null && widget.quantities != null) {
+        // Handle single product purchase (from Buy Now)
+        if (widget.singleProduct != null) {
+          // Calculate based on single product
+          final price =
+              double.tryParse(widget.singleProduct.discountPrice ?? '0.0') ??
+              0.0;
+          subtotal = price;
+          totalAmount = subtotal + deliveryCharge;
+        } else if (widget.products != null && widget.quantities != null) {
           calculateTotal();
         } else if (data['cart_items'] != null && data['cart_items'] is List) {
-          // Calculate based on cart items from API
           calculateTotalFromApi(data['cart_items']);
         }
 
@@ -84,6 +95,27 @@ class _CheckoutPageState extends State<CheckoutPage> {
       setState(() {
         error = 'Failed to load checkout details. Please try again.';
         isLoading = false;
+      });
+    }
+  }
+
+  void calculateSingleProductTotal() {
+    if (widget.singleProduct != null) {
+      // Get price from the single product
+      final price =
+          double.tryParse(
+            widget.singleProduct!['discount_price']?.toString() ??
+                widget.singleProduct!['price']?.toString() ??
+                '0.0',
+          ) ??
+          0.0;
+
+      // Get quantity (default to 1 if not specified)
+      final quantity = widget.singleProduct!['quantity'] ?? 1;
+
+      setState(() {
+        subtotal = price * quantity;
+        totalAmount = subtotal + deliveryCharge;
       });
     }
   }
@@ -134,12 +166,30 @@ class _CheckoutPageState extends State<CheckoutPage> {
     if (paymentMethod == 'cash-on-delivery') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const CashOnDeliveryPage()),
+        MaterialPageRoute(
+          builder:
+              (context) => CashOnDeliveryPage(
+                products: checkoutProducts,
+                subtotal: subtotal,
+                deliveryCharge: deliveryCharge,
+                totalAmount: totalAmount,
+                isSingleProductPurchase: widget.singleProduct != null,
+              ),
+        ),
       );
     } else if (paymentMethod == 'online') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const OnlinePaymentPage()),
+        MaterialPageRoute(
+          builder:
+              (context) => OnlinePaymentPage(
+                products: checkoutProducts,
+                subtotal: subtotal,
+                deliveryCharge: deliveryCharge,
+                totalAmount: totalAmount,
+                isSingleProductPurchase: widget.singleProduct != null,
+              ),
+        ),
       );
     }
   }
@@ -234,7 +284,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 const Icon(Icons.shopping_bag, color: Color(0xFF3D7BE2)),
                 const SizedBox(width: 12),
                 Text(
-                  'Your order is just a few steps away',
+                  widget.isSingleProductPurchase
+                      ? 'Complete your purchase'
+                      : 'Your order is just a few steps away',
                   style: TextStyle(fontSize: 14, color: Colors.grey[800]),
                 ),
               ],
@@ -551,7 +603,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
           const SizedBox(height: 16),
 
-          // Price details section with improved design
+          // Price details section
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
@@ -565,6 +617,80 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   offset: const Offset(0, 2),
                 ),
               ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.receipt,
+                        color: Color(0xFFFF3E6C),
+                        size: 22,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'PRICE DETAILS',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Item Total',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      ),
+                      Text(
+                        '\$${subtotal.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Delivery Charge',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      ),
+                      Text(
+                        '\$${deliveryCharge.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Total Amount',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '\$${totalAmount.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -602,11 +728,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'PROCEED TO PAY ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                'PROCEED TO PAY \$${totalAmount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-
               const SizedBox(width: 8),
               const Icon(Icons.arrow_forward),
             ],

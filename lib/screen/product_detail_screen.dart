@@ -786,7 +786,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       // Navigate directly to checkout screen (You'll need to create this screen)
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => CheckoutPage()),
+        MaterialPageRoute(
+          builder: (context) => CheckoutPage(singleProduct: productId),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(
