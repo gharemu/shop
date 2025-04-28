@@ -61,27 +61,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
       final data = await _checkoutService.getCheckout();
 
       setState(() {
-        // Check if address is a Map or convert as needed
+        // Handle address
         if (data['address'] is Map) {
           Map<String, dynamic> addressData = data['address'];
           name = addressData['name']?.toString() ?? '';
           address = addressData['address']?.toString() ?? '';
           phoneNumber = addressData['phone_number']?.toString() ?? '';
         } else {
-          // Alternative approach if the structure is different
           name = data['name']?.toString() ?? '';
           address = data['address']?.toString() ?? '';
           phoneNumber = data['phone_number']?.toString() ?? '';
         }
 
-        // Handle single product purchase (from Buy Now)
+        // Handle checkout calculation
         if (widget.singleProduct != null) {
-          // Calculate based on single product
-          final price =
-              double.tryParse(widget.singleProduct.discountPrice ?? '0.0') ??
-              0.0;
-          subtotal = price;
-          totalAmount = subtotal + deliveryCharge;
+          // ✅ Correct way: call the method you already made
+          calculateSingleProductTotal();
         } else if (widget.products != null && widget.quantities != null) {
           calculateTotal();
         } else if (data['cart_items'] != null && data['cart_items'] is List) {
@@ -101,17 +96,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   void calculateSingleProductTotal() {
     if (widget.singleProduct != null) {
-      // Get price from the single product
+      final product = widget.singleProduct!;
       final price =
           double.tryParse(
-            widget.singleProduct!['discount_price']?.toString() ??
-                widget.singleProduct!['price']?.toString() ??
+            product['discount_price']?.toString() ??
+                product['price']?.toString() ??
                 '0.0',
           ) ??
           0.0;
 
-      // Get quantity (default to 1 if not specified)
-      final quantity = widget.singleProduct!['quantity'] ?? 1;
+      final quantity =
+          int.tryParse(product['quantity']?.toString() ?? '1') ?? 1;
 
       setState(() {
         subtotal = price * quantity;

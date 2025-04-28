@@ -218,9 +218,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildProductGrid(_productService.getMenProducts()),
-                _buildProductGrid(_productService.getWomenProducts()),
-                _buildProductGrid(_productService.getKidsProducts()),
+                _buildProductTab(_productService.getMenProducts()),
+                _buildProductTab(_productService.getWomenProducts()),
+                _buildProductTab(_productService.getKidsProducts()),
               ],
             ),
           ),
@@ -240,181 +240,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
-  Widget _buildProductGrid(Future<List<Product>> futureProducts) {
-    return Column(
-      children: [
-        // Advertisement Banner at the top
-        _buildOfferBanner(),
-
-        // Product Grid with Expanded to fill remaining space and ensure scrollability
-        Expanded(
-          child: FutureBuilder<List<Product>>(
-            future: futureProducts,
-            builder: (context, snapshot) {
-              if (_isLoading ||
-                  snapshot.connectionState == ConnectionState.waiting) {
-                return _buildLoadingGrid();
-              }
-
-              if (snapshot.hasError) {
-                return _buildErrorState();
-              }
-
-              final products = snapshot.data ?? [];
-
-              if (products.isEmpty) {
-                return _buildEmptyState();
-              }
-
-              return _buildScrollableProductsGrid(products);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOfferBanner() {
-    return FadeTransition(
-      opacity: _bannerAnimation,
-      child: Container(
-        height: 120,
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.purple[100]!, Colors.pink[300]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              "BUDGET BUYS",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "ALL UNDER ₹999",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Limited time offer!",
-              style: TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Something went wrong',
-              style: TextStyle(
-                color: Colors.grey[800],
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Pull to refresh and try again',
-              style: TextStyle(color: Colors.grey[600], fontSize: 15),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Implement retry functionality
-                setState(() {
-                  _isLoading = true;
-                });
-                // Reload products
-              },
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              label: const Text('Retry', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF3E6C),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.shopping_bag_outlined,
-              size: 80,
-              color: Colors.grey[400],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            "No products available in this category",
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScrollableProductsGrid(List<Product> products) {
-    // Using RefreshIndicator wrapped around the grid for pull-to-refresh functionality
+  Widget _buildProductTab(Future<List<Product>> futureProducts) {
+    // Use NestedScrollView to properly handle scrolling with a fixed banner at the top
     return RefreshIndicator(
       color: const Color(0xFFFF3E6C),
       backgroundColor: Colors.white,
@@ -436,39 +263,294 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           });
         }
       },
-      // Using MasonryGridView for a dynamic staggered grid layout
-      child: MasonryGridView.count(
-        controller: _scrollController, // Important for scrolling
-        physics:
-            const AlwaysScrollableScrollPhysics(), // Ensures scrollability even when content is small
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        padding: const EdgeInsets.all(16),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          // Determine height factor for variety
-          final heightFactor =
-              index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
+      child: CustomScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // Banner as a sliver
+          SliverToBoxAdapter(child: _buildEnhancedOfferBanner()),
 
-          // Create animated product card
-          return AnimatedOpacity(
-            opacity: 1.0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            child: AnimatedPadding(
-              padding: EdgeInsets.only(top: index < 2 ? 0 : 0),
-              duration: const Duration(milliseconds: 500),
-              child: _buildSimplifiedProductCard(products[index], heightFactor),
+          // Products
+          SliverToBoxAdapter(
+            child: FutureBuilder<List<Product>>(
+              future: futureProducts,
+              builder: (context, snapshot) {
+                if (_isLoading ||
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildLoadingGrid();
+                }
+
+                if (snapshot.hasError) {
+                  return _buildErrorState();
+                }
+
+                final products = snapshot.data ?? [];
+
+                if (products.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return _buildProductsGrid(products);
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildEnhancedOfferBanner() {
+    return FadeTransition(
+      opacity: _bannerAnimation,
+      child: Container(
+        height: 150,
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF8E2DE2), Color(0xFFFF4E50)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Decorative elements
+            Positioned(
+              right: -20,
+              top: -20,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            Positioned(
+              left: -15,
+              bottom: -15,
+              child: Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+
+            // Content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      "EXCLUSIVE OFFER",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "BUDGET BUYS",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      "ALL UNDER ₹999",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF4E50),
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.timer, color: Colors.white, size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        "Limited time offer!",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Container(
+      height: 500,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Something went wrong',
+            style: TextStyle(
+              color: Colors.grey[800],
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Pull to refresh and try again',
+            style: TextStyle(color: Colors.grey[600], fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () {
+              // Implement retry functionality
+              setState(() {
+                _isLoading = true;
+              });
+              // Reload products
+            },
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            label: const Text('Retry', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF3E6C),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      height: 500,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                size: 80,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "No products available in this category",
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductsGrid(List<Product> products) {
+    return MasonryGridView.count(
+      shrinkWrap: true, // Important for nested scrolling
+      physics:
+          const NeverScrollableScrollPhysics(), // Disable scrolling on the grid itself
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      padding: const EdgeInsets.all(16),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        // Determine height factor for variety
+        final heightFactor =
+            index % 3 == 0 ? 1.1 : (index % 5 == 0 ? 0.9 : 1.0);
+
+        // Create animated product card
+        return AnimatedOpacity(
+          opacity: 1.0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+          child: AnimatedPadding(
+            padding: EdgeInsets.only(top: index < 2 ? 0 : 0),
+            duration: const Duration(milliseconds: 500),
+            child: _buildSimplifiedProductCard(products[index], heightFactor),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildLoadingGrid() {
     return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
