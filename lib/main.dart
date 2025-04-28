@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
         // Handle dynamic routes or routes with parameters
         if (settings.name == '/checkout_from_profile') {
           return MaterialPageRoute(
-            builder: (context) => const CheckoutPage(comingFromProfile: true),
+            builder: (context) => const CheckoutPage(),
           );
         }
         return null;

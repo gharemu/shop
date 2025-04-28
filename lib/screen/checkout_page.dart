@@ -1,4 +1,4 @@
-import 'package:Deals/login/profile_account.dart';
+ import 'package:Deals/login/profile_account.dart';
 import 'package:Deals/screen/cashondel.dart';
 import 'package:Deals/screen/onlinepayment.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +54,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 Future<void> loadCheckoutData() async {
   try {
     if (widget.products != null && widget.quantities != null) {
-      // Direct Buy Now flow 
+      // Direct Buy Now flow
       calculateTotal();
       setState(() {
         isLoading = false;
