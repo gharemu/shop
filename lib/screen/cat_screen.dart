@@ -646,12 +646,13 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         );
       },
       child: Container(
+        height: 320, // Fixed card height
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -662,35 +663,39 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Fixed height image container
               Stack(
                 children: [
                   // Product Image with Hero Animation
-                  Hero(
-                    tag: heroTag,
-                    child: Image.network(
-                      product.image!,
-                      height: 190 * heightFactor, // Slightly reduced height
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          height: 190 * heightFactor,
-                          width: double.infinity,
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: const Color(0xFFFF3E6C),
-                              value:
-                                  loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                              strokeWidth: 2,
+                  Container(
+                    height: 200, // Fixed image height
+                    width: double.infinity,
+                    child: Hero(
+                      tag: heroTag,
+                      child: Image.network(
+                        product.image!,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            height: 200,
+                            width: double.infinity,
+                            color: Colors.grey[200],
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: const Color(0xFFFF3E6C),
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                strokeWidth: 2,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                   // Discount Tag if applicable
@@ -751,58 +756,63 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   ),
                 ],
               ),
-              // Product Information
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        letterSpacing: 0.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      product.description!,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                        height: 1.2,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    // Price Section
-                    Row(
-                      children: [
-                        Text(
-                          "₹${product.discountPrice}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Color(0xFF212121),
-                          ),
+              // Product Information with fixed height
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
                         ),
-                        const SizedBox(width: 6),
-                        if (hasDiscount)
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        height: 32, // Fixed height for description
+                        child: Text(
+                          product.description!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            height: 1.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Spacer(), // Push price to bottom
+                      // Price Section
+                      Row(
+                        children: [
                           Text(
-                            "₹${product.oldPrice}",
-                            style: TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                              fontSize: 11,
-                              color: Colors.grey[600],
+                            "₹${product.discountPrice}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Color(0xFF212121),
                             ),
                           ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 6),
+                          if (hasDiscount)
+                            Text(
+                              "₹${product.oldPrice}",
+                              style: TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

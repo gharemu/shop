@@ -596,44 +596,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Row(
         children: [
           // BUY NOW button
-        // Replace the 'BUY NOW' button in the _buildBottomButtons() method with this:
+          // Replace the 'BUY NOW' button in the _buildBottomButtons() method with this:
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFFFF3E6C),
+                side: const BorderSide(color: Color(0xFFFF3E6C)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              onPressed: () {
+                if (widget.product != null && widget.product.id != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => BuyNowCheckoutPage(
+                            product:
+                                widget.product, // Pass the full product object
+                            quantity: _quantity,
+                          ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Invalid product!")),
+                  );
+                }
+              },
 
-Expanded(
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.white,
-      foregroundColor: const Color(0xFFFF3E6C),
-      side: const BorderSide(color: Color(0xFFFF3E6C)),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      elevation: 0,
-    ),
-  onPressed: () {
-  if (widget.product != null && widget.product.id != null) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BuyNowCheckoutPage(
-          product: widget.product,  // Pass the full product object
-          quantity: _quantity,
-        ),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Invalid product!")),
-    );
-  }
-},
-
-    child: const Text(
-      "BUY NOW",
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-    ),
-  ),
-),
+              child: const Text(
+                "BUY NOW",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
 
           const SizedBox(width: 12),
           // ADD TO BAG or GO TO BAG button
@@ -809,9 +810,7 @@ Expanded(
       // Navigate directly to checkout screen (You'll need to create this screen)
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutPage(singleProduct: productId),
-        ),
+        MaterialPageRoute(builder: (context) => CheckoutPage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
