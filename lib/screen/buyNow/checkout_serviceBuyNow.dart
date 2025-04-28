@@ -29,21 +29,33 @@ class CheckoutService {
     }
   }
 
-  // GET Order Summary
-  Future<Map<String, dynamic>> getOrderSummary() async {
+  // // ✅ Get Order Summary for specific productId (for Buy Now)
+  Future<Map<String, dynamic>> getOrderSummary(String productId) async {
     final headers = await _getAuthHeaders();
     final response = await http.get(
-      Uri.parse('$_baseUrl/order-summary'),
+      Uri.parse('$_baseUrl/order-summary?productId=$productId'),
       headers: headers,
     );
-    // Debug: Print the response body for debugging purposes
-    print('Response Status: ${response.statusCode}');
-    print('Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load order summary');
+      throw Exception('Failed to fetch order summary.');
+    }
+  }
+
+  // Initiate Buy Now checkout (GET Request)
+  Future<Map<String, dynamic>> initiateBuyNow(String productId) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/product/$productId'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to initiate Buy Now checkout.');
     }
   }
 }

@@ -5,7 +5,7 @@ import 'package:Deals/login/api_service.dart';
 
 class CartService {
   // Update to match your product_service.dart IP address
-  static const String baseUrl = 'http://192.168.10.64:5000/api';
+  static const String baseUrl = 'http://192.168.10.41:5000/api';
 
   // Add a product to wishlist
   static Future<bool> addToCart(int productId, String token) async {
@@ -87,7 +87,7 @@ class CartService {
     }
 
     final uri = Uri.parse(
-      'http://192.168.10.62:5000/api/cart/cartdel/$cartItemId',
+      'http://192.168.10.41:5000/api/cart/cartdel/$cartItemId',
     );
 
     final res = await http.delete(

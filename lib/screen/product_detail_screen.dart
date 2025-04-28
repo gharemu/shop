@@ -610,23 +610,24 @@ Expanded(
       ),
       elevation: 0,
     ),
-    onPressed: () {
-      if (widget.product.id != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BuyNowCheckoutPage(
-              productId: widget.product.id.toString(),
-              quantity: _quantity,
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invalid product!")),
-        );
-      }
-    },
+  onPressed: () {
+  if (widget.product != null && widget.product.id != null) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BuyNowCheckoutPage(
+          product: widget.product,  // Pass the full product object
+          quantity: _quantity,
+        ),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Invalid product!")),
+    );
+  }
+},
+
     child: const Text(
       "BUY NOW",
       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

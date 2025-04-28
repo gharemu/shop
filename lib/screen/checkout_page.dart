@@ -51,43 +51,45 @@ class _CheckoutPageState extends State<CheckoutPage> {
       });
     }
   }
-
-  Future<void> loadCheckoutData() async {
-    try {
+Future<void> loadCheckoutData() async {
+  try {
+    if (widget.products != null && widget.quantities != null) {
+      // Direct Buy Now flow 
+      calculateTotal();
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      // Cart Checkout flow
       final data = await _checkoutService.getCheckout();
 
       setState(() {
-        // Check if address is a Map or convert as needed
         if (data['address'] is Map) {
           Map<String, dynamic> addressData = data['address'];
           name = addressData['name']?.toString() ?? '';
           address = addressData['address']?.toString() ?? '';
           phoneNumber = addressData['phone_number']?.toString() ?? '';
         } else {
-          // Alternative approach if the structure is different
           name = data['name']?.toString() ?? '';
           address = data['address']?.toString() ?? '';
           phoneNumber = data['phone_number']?.toString() ?? '';
         }
 
-        // Calculate order total if products are passed
-        if (widget.products != null && widget.quantities != null) {
-          calculateTotal();
-        } else if (data['cart_items'] != null && data['cart_items'] is List) {
-          // Calculate based on cart items from API
+        if (data['cart_items'] != null && data['cart_items'] is List) {
           calculateTotalFromApi(data['cart_items']);
         }
 
         isLoading = false;
       });
-    } catch (e) {
-      print('Error loading checkout data: $e');
-      setState(() {
-        error = 'Failed to load checkout details. Please try again.';
-        isLoading = false;
-      });
     }
+  } catch (e) {
+    print('Error loading checkout data: $e');
+    setState(() {
+      error = 'Failed to load checkout details. Please try again.';
+      isLoading = false;
+    });
   }
+}
 
   void calculateTotal() {
     double sum = 0.0;
@@ -313,19 +315,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-<<<<<<< HEAD
-                        Text(name, style: const TextStyle(fontSize: 18)),
-                       TextButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ProfilePage()),
-    );
-  },
-  child: const Text('EDIT', style: TextStyle(color: Colors.blue)),
-),
-
-=======
                         Text(
                           name,
                           style: const TextStyle(
@@ -359,7 +348,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             ),
                           ],
                         ),
->>>>>>> 30697ea62f05efeb2d117158c8470ed746976fd5
                       ],
                     ),
                   ),
