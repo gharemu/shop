@@ -4,8 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String authUrl = "http://192.168.10.41:5000/api/auth";
-  static const String userUrl = "http://192.168.10.41:5000/api/user";
+  static const String authUrl =
+      "http://shop-backend-eyqo.onrender.com/api/auth";
+  static const String userUrl =
+      "http://shop-backend-eyqo.onrender.com/api/user";
   static const String TOKEN_KEY = "user_token";
   static const String USER_DATA_KEY = "user_data";
 

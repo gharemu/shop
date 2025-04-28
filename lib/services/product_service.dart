@@ -5,7 +5,7 @@ import 'package:Deals/models/product.dart';
 
 class ProductService {
   final String baseUrl =
-      "http://192.168.10.41:5000/api"; // Replace with your actual backend API URL
+      "http://shop-backend-eyqo.onrender.com/api"; // Replace with your actual backend API URL
 
   // Fetch Men products
   Future<List<Product>> getMenProducts() async {
@@ -70,52 +70,37 @@ class ProductService {
     }
   }
 
-  // Fetch all products under 999
   Future<List<Product>> getUnder999Products() async {
-    final response = await http.get(Uri.parse('$baseUrl/products'));
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/products'));
 
-    if (response.statusCode == 200) {
-      List jsonData = json.decode(response.body);
-      List<Product> allProducts =
-          jsonData.map((product) => Product.fromJson(product)).toList();
+      if (response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        List<Product> allProducts =
+            jsonData.map((product) => Product.fromJson(product)).toList();
 
-      // Filter products with discountedPrice less than or equal to ₹999
-      List<Product> under999Products =
-          allProducts
-              .where(
-                (product) => int.parse(product.discountPrice.toString()) <= 999,
-              )
-              .toList();
+        // Filter products with discountPrice less than or equal to ₹999
+        List<Product> under999Products =
+            allProducts
+                .where(
+                  (product) =>
+                      product.discountPrice != null ||
+                      int.tryParse(product.discountPrice.toString()) != null ||
+                      int.parse(product.discountPrice.toString()) <= 999,
+                )
+                .toList();
 
-      return under999Products;
-    } else {
-      throw Exception('Failed to load products under ₹999');
+        return under999Products;
+      } else {
+        throw Exception('Failed to load products: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching products under ₹999: $e');
+      throw Exception('Failed to load products under ₹999: $e');
     }
   }
 
   // Fetch Luxury products
-  Future<List<Product>> getLuxuryProducts() async {
-    final response = await http.get(Uri.parse('$baseUrl/products/luxury'));
-    if (response.statusCode == 200) {
-      List jsonData = json.decode(response.body);
-      return jsonData.map((product) => Product.fromJson(product)).toList();
-    } else {
-      throw Exception('Failed to load Luxury products');
-    }
-  }
-
-  // Fetch products by category
-  Future<List<Product>> getProductsByCategory(String category) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/products/category/$category'),
-    );
-    if (response.statusCode == 200) {
-      List jsonData = json.decode(response.body);
-      return jsonData.map((product) => Product.fromJson(product)).toList();
-    } else {
-      throw Exception('Failed to load products by category');
-    }
-  }
 
   // Fetch products by gender
   Future<List<Product>> getProductsByGender(String gender) async {
@@ -197,7 +182,7 @@ class ProductService {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.10.41:5000/api/cart/cartadd'),
+        Uri.parse('http://shop-backend-eyqo.onrender.com/api/cart/cartadd'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -223,7 +208,9 @@ class ProductService {
 
   // Static method to get Cart Items
   static Future<List<Product>> getCartItems(String token) async {
-    final Uri url = Uri.parse("http://192.168.10.41:5000/api/cart/cartget");
+    final Uri url = Uri.parse(
+      "http://shop-backend-eyqo.onrender.com/api/cart/cartget",
+    );
 
     try {
       final response = await http.get(
@@ -264,7 +251,9 @@ class ProductService {
     int quantity,
     String token,
   ) async {
-    final Uri url = Uri.parse("http://192.168.10.41:5000/api/cart/cartadd");
+    final Uri url = Uri.parse(
+      "http://shop-backend-eyqo.onrender.com/api/cart/cartadd",
+    );
 
     try {
       final response = await http.post(
@@ -288,7 +277,7 @@ class ProductService {
   // Renamed to avoid duplicate definition
   static Future<bool> removeCartItem(int cartItemId, String token) async {
     final Uri url = Uri.parse(
-      "http://192.168.10.41:5000/api/cart/cartdel/$cartItemId",
+      "http://shop-backend-eyqo.onrender.com/api/cart/cartdel/$cartItemId",
     );
 
     try {
@@ -314,7 +303,7 @@ class ProductService {
     }
 
     final uri = Uri.parse(
-      'http://192.168.10.41:5000/api/cart/cartdel/$cartItemId',
+      'http://shop-backend-eyqo.onrender.com/api/cart/cartdel/$cartItemId',
     );
 
     final res = await http.delete(

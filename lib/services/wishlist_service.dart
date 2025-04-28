@@ -5,7 +5,7 @@ import 'package:Deals/login/api_service.dart';
 
 class WishlistService {
   // Update to match your product_service.dart IP address
-  static const String baseUrl = 'http://192.168.10.41:5000/api';
+  static const String baseUrl = 'http://shop-backend-eyqo.onrender.com/api';
 
   // Add a product to wishlist
   static Future<bool> addToWishlist(int productId, String token) async {
@@ -87,7 +87,7 @@ class WishlistService {
     }
 
     final uri = Uri.parse(
-      'http://192.168.10.41:5000/api/wishlist/wishlistdel/$cartItemId',
+      'http://shop-backend-eyqo.onrender.com/api/wishlist/wishlistdel/$cartItemId',
     );
 
     final res = await http.delete(
