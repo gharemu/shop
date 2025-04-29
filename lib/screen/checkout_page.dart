@@ -1,9 +1,9 @@
- import 'package:Deals/login/profile_account.dart';
+import 'package:Deals/login/profile_account.dart';
 import 'package:Deals/screen/cashondel.dart';
 import 'package:Deals/screen/onlinepayment.dart';
 import 'package:flutter/material.dart';
 import 'package:Deals/services/checkoutservice.dart';
-import 'package:Deals/login/profile_account.dart';
+//import 'package:Deals/login/profile_account.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<dynamic>? products;
@@ -51,45 +51,46 @@ class _CheckoutPageState extends State<CheckoutPage> {
       });
     }
   }
-Future<void> loadCheckoutData() async {
-  try {
-    if (widget.products != null && widget.quantities != null) {
-      // Direct Buy Now flow
-      calculateTotal();
+
+  Future<void> loadCheckoutData() async {
+    try {
+      if (widget.products != null && widget.quantities != null) {
+        // Direct Buy Now flow
+        calculateTotal();
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        // Cart Checkout flow
+        final data = await _checkoutService.getCheckout();
+
+        setState(() {
+          if (data['address'] is Map) {
+            Map<String, dynamic> addressData = data['address'];
+            name = addressData['name']?.toString() ?? '';
+            address = addressData['address']?.toString() ?? '';
+            phoneNumber = addressData['phone_number']?.toString() ?? '';
+          } else {
+            name = data['name']?.toString() ?? '';
+            address = data['address']?.toString() ?? '';
+            phoneNumber = data['phone_number']?.toString() ?? '';
+          }
+
+          if (data['cart_items'] != null && data['cart_items'] is List) {
+            calculateTotalFromApi(data['cart_items']);
+          }
+
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading checkout data: $e');
       setState(() {
-        isLoading = false;
-      });
-    } else {
-      // Cart Checkout flow
-      final data = await _checkoutService.getCheckout();
-
-      setState(() {
-        if (data['address'] is Map) {
-          Map<String, dynamic> addressData = data['address'];
-          name = addressData['name']?.toString() ?? '';
-          address = addressData['address']?.toString() ?? '';
-          phoneNumber = addressData['phone_number']?.toString() ?? '';
-        } else {
-          name = data['name']?.toString() ?? '';
-          address = data['address']?.toString() ?? '';
-          phoneNumber = data['phone_number']?.toString() ?? '';
-        }
-
-        if (data['cart_items'] != null && data['cart_items'] is List) {
-          calculateTotalFromApi(data['cart_items']);
-        }
-
+        error = 'Failed to load checkout details. Please try again.';
         isLoading = false;
       });
     }
-  } catch (e) {
-    print('Error loading checkout data: $e');
-    setState(() {
-      error = 'Failed to load checkout details. Please try again.';
-      isLoading = false;
-    });
   }
-}
 
   void calculateTotal() {
     double sum = 0.0;

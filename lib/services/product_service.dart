@@ -5,7 +5,7 @@ import 'package:Deals/models/product.dart';
 
 class ProductService {
   final String baseUrl =
-      "http://shop-backend-eyqo.onrender.com/api"; // Replace with your actual backend API URL
+      "http://192.168.10.62:5000/api"; // Replace with your actual backend API URL
 
   // Fetch Men products
   Future<List<Product>> getMenProducts() async {
@@ -182,7 +182,7 @@ class ProductService {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('http://shop-backend-eyqo.onrender.com/api/cart/cartadd'),
+        Uri.parse('http://192.168.10.62:5000/api/cart/cartadd'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -208,9 +208,7 @@ class ProductService {
 
   // Static method to get Cart Items
   static Future<List<Product>> getCartItems(String token) async {
-    final Uri url = Uri.parse(
-      "http://shop-backend-eyqo.onrender.com/api/cart/cartget",
-    );
+    final Uri url = Uri.parse("http://192.168.10.62:5000/api/cart/cartget");
 
     try {
       final response = await http.get(
@@ -251,9 +249,7 @@ class ProductService {
     int quantity,
     String token,
   ) async {
-    final Uri url = Uri.parse(
-      "http://shop-backend-eyqo.onrender.com/api/cart/cartadd",
-    );
+    final Uri url = Uri.parse("http://192.168.10.62:5000/api/cart/cartadd");
 
     try {
       final response = await http.post(
@@ -277,7 +273,7 @@ class ProductService {
   // Renamed to avoid duplicate definition
   static Future<bool> removeCartItem(int cartItemId, String token) async {
     final Uri url = Uri.parse(
-      "http://shop-backend-eyqo.onrender.com/api/cart/cartdel/$cartItemId",
+      "http://192.168.10.62:5000/api/cart/cartdel/$cartItemId",
     );
 
     try {
@@ -303,7 +299,7 @@ class ProductService {
     }
 
     final uri = Uri.parse(
-      'http://shop-backend-eyqo.onrender.com/api/cart/cartdel/$cartItemId',
+      'http://192.168.10.62:5000/api/cart/cartdel/$cartItemId',
     );
 
     final res = await http.delete(

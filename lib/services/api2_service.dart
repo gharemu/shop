@@ -16,7 +16,7 @@ class CategoryData {
 
 class CategoryService {
   // You can use your API base URL here
-  final String baseUrl = 'http://shop-backend-eyqo.onrender.com/api';
+  final String baseUrl = 'http://192.168.10.62:5000/api';
 
   Future<CategoryData> fetchCategories() async {
     final response = await http.get(Uri.parse('$baseUrl/products'));
