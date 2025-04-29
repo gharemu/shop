@@ -3,7 +3,8 @@ import 'package:Deals/login/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class CheckoutService {
-  static const String _baseUrl = 'http://192.168.10.62:5000/api/checkout';
+  static const String _baseUrl =
+      'https://shop-backend-a65i.onrender.com/api/checkout';
 
   // Get Auth Headers using ApiService's getToken
   Future<Map<String, String>> _getAuthHeaders() async {
