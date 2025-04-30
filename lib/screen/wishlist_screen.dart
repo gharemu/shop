@@ -16,6 +16,16 @@ class _WishlistScreenState extends State<WishlistScreen> {
   bool isLoading = true;
   String? errorMessage;
 
+  // Pink theme colors
+  final Color primaryPink = const Color(0xFFFFC0CB); // Light pink
+  final Color accentPink = const Color(0xFFFF90B3); // Darker pink for contrast
+  final Color backgroundPink = const Color(
+    0xFFFFF0F5,
+  ); // Very light pink background
+  final Color textPink = const Color(
+    0xFFE75480,
+  ); // Medium pink for text accents
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +65,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     if (item.wishlistItemId == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item has no wishlistItemId')),
+          SnackBar(
+            content: const Text('Item has no wishlistItemId'),
+            backgroundColor: accentPink.withOpacity(0.8),
+          ),
         );
       }
       return;
@@ -75,9 +88,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
         setState(() {
           wishlistItems = backup;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to remove item: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to remove item: $e'),
+            backgroundColor: accentPink.withOpacity(0.8),
+          ),
+        );
       }
     }
   }
@@ -85,12 +101,69 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wishlist')),
+      backgroundColor: backgroundPink,
+      appBar: AppBar(
+        title: const Text(
+          'My Wishlist',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: primaryPink,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body:
           isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator(color: accentPink))
               : errorMessage != null
-              ? Center(child: Text(errorMessage!))
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite_border,
+                      size: 80,
+                      color: accentPink.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      errorMessage!,
+                      style: TextStyle(color: textPink, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+              : wishlistItems.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite_border,
+                      size: 80,
+                      color: accentPink.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Your wishlist is empty',
+                      style: TextStyle(
+                        color: textPink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Start adding items you love!',
+                      style: TextStyle(
+                        color: textPink.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: wishlistItems.length,
@@ -109,6 +182,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         ),
                       );
                     },
+                    primaryPink: primaryPink,
+                    accentPink: accentPink,
+                    textPink: textPink,
                   );
                 },
               ),
@@ -120,94 +196,148 @@ class WishlistItem extends StatelessWidget {
   final Product product;
   final VoidCallback onRemove;
   final VoidCallback onTap;
+  final Color primaryPink;
+  final Color accentPink;
+  final Color textPink;
 
   const WishlistItem({
     super.key,
     required this.product,
     required this.onRemove,
     required this.onTap,
+    required this.primaryPink,
+    required this.accentPink,
+    required this.textPink,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  product.image ?? '',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: primaryPink.withOpacity(0.3), width: 1.5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                Stack(
                   children: [
-                    Text(
-                      product.name ?? '',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        product.image ?? '',
+                        width: 100,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 100,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: primaryPink.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: primaryPink,
+                              size: 30,
+                            ),
+                          );
+                        },
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '₹${product.discountPrice ?? ''}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Color(0xFFFF3E6C),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: onRemove,
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('REMOVE'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
+                    // Pink overlay at the corner for visual appeal
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                          side: BorderSide(color: Colors.grey[300]!),
+                        decoration: BoxDecoration(
+                          color: accentPink.withOpacity(0.8),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 14,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(width: 16),
+                // Product Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name ?? '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Text(
+                            '₹${product.discountPrice ?? ''}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: textPink,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: onRemove,
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            label: const Text('REMOVE'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: textPink,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(color: primaryPink),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
