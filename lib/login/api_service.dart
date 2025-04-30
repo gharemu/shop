@@ -189,4 +189,39 @@ class ApiService {
     }
     return null;
   }
+
+  static Future<Map<String, dynamic>> getOrders(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://shop-backend-a65i.onrender.com/api/pay/cod'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Orders fetched successfully',
+          'data': responseData['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to fetch orders',
+          'data': null,
+        };
+      }
+    } catch (e) {
+      print('Error in getOrders: $e');
+      return {
+        'success': false,
+        'message': 'Connection error. Please check your internet connection.',
+        'data': null,
+      };
+    }
+  }
 }

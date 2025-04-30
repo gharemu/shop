@@ -6,12 +6,18 @@ import 'package:Deals/screen/checkout_page.dart';
 import 'package:Deals/login/profile_account.dart';
 import 'package:Deals/screen/cashondel.dart';
 import 'package:Deals/screen/onlinepayment.dart';
-import 'package:Deals/login/login_page.dart'; // Assuming you have this
+import 'package:Deals/login/login_page.dart';
+import 'package:Deals/screen/custome_app_bar.dart';
+import 'package:Deals/providers/badge_provider.dart';
+// Assuming you have this
 
 void main() {
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => UserProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => BadgeProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -65,9 +71,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         // Handle dynamic routes or routes with parameters
         if (settings.name == '/checkout_from_profile') {
-          return MaterialPageRoute(
-            builder: (context) => const CheckoutPage(),
-          );
+          return MaterialPageRoute(builder: (context) => const CheckoutPage());
         }
         return null;
       },
